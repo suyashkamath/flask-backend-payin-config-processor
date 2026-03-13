@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payout Recalculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:#08090d; --bg2:#0f1117; --bg3:#161820;
+      --border:rgba(255,255,255,.07); --border2:rgba(255,255,255,.12);
+      --teal:#00d4aa; --teal-dim:rgba(0,212,170,.12); --teal-glow:rgba(0,212,170,.35);
+      --amber:#f5a623; --amber-dim:rgba(245,166,35,.12);
+      --red:#ff4d6d; --red-dim:rgba(255,77,109,.1);
+      --green:#00e676; --green-dim:rgba(0,230,118,.1);
+      --blue:#4d9fff; --purple:#a78bfa;
+      --text:#e8eaf0; --muted:rgba(232,234,240,.4); --muted2:rgba(232,234,240,.22);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family:'Inter',sans-serif; background:var(--bg); color:var(--text);
+      min-height:100vh; display:flex; flex-direction:column;
+      background-image:
+        linear-gradient(rgba(255,255,255,.013) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.013) 1px,transparent 1px);
+      background-size:40px 40px;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      background:rgba(8,9,13,.9); backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border); padding:0 2rem; height:60px;
+      display:flex; align-items:center; gap:.9rem; position:sticky; top:0; z-index:200;
+    }
+    .logo-mark {
+      width:34px; height:34px;
+      background:linear-gradient(135deg,var(--teal),#007aff);
+      border-radius:9px; display:flex; align-items:center; justify-content:center;
+      font-size:16px; flex-shrink:0; box-shadow:0 0 18px rgba(0,212,170,.28);
+    }
+    .topbar-title { font-family:'Syne',sans-serif; font-size:.95rem; font-weight:700; letter-spacing:-.3px; }
+    .topbar-sub   { font-size:.68rem; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-left:.3rem; }
+    .topbar-right { margin-left:auto; display:flex; align-items:center; gap:.5rem; }
+    .version-pill {
+      font-family:'JetBrains Mono',monospace; font-size:.65rem; color:var(--teal);
+      background:var(--teal-dim); border:1px solid rgba(0,212,170,.25);
+      border-radius:999px; padding:.2rem .65rem;
+    }
+
+    /* ── MAIN ── */
+    .main { flex:1; display:flex; align-items:flex-start; justify-content:center; padding:2rem 1.5rem; }
+    .page { width:100%; max-width:1100px; display:flex; flex-direction:column; gap:1.4rem; }
+
+    /* ── CARD ── */
+    .card {
+      background:var(--bg2); border:1px solid var(--border); border-radius:14px;
+      overflow:hidden; position:relative;
+    }
+    .card::before {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(135deg,rgba(0,212,170,.025) 0%,transparent 55%);
+      pointer-events:none;
+    }
+    .card-head {
+      padding:.85rem 1.3rem; border-bottom:1px solid var(--border);
+      display:flex; align-items:center; gap:.7rem; flex-wrap:wrap;
+    }
+    .step-badge {
+      font-family:'Syne',sans-serif; font-size:.65rem; font-weight:800;
+      color:#000; background:var(--teal); width:22px; height:22px;
+      border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    }
+    .step-badge.amber { background:var(--amber); }
+    .step-badge.purple { background:var(--purple); }
+    .card-head h2 { font-family:'Syne',sans-serif; font-size:.88rem; font-weight:700; }
+    .card-head .sub { font-size:.7rem; color:var(--muted); margin-left:auto; font-family:'JetBrains Mono',monospace; }
+    .card-body { padding:1.3rem; display:flex; flex-direction:column; gap:.85rem; }
+
+    /* ── LABEL ── */
+    .lbl {
+      font-family:'JetBrains Mono',monospace; font-size:.62rem; font-weight:600;
+      color:var(--muted); text-transform:uppercase; letter-spacing:.1em;
+      margin-bottom:.35rem; display:flex; align-items:center; gap:.4rem;
+    }
+    .lbl .req { color:var(--red); font-size:.7rem; }
+    .lbl .opt { color:var(--muted2); font-size:.6rem; background:var(--bg3);
+                border:1px solid var(--border); border-radius:4px; padding:.05rem .35rem; }
+
+    /* ── GRID ── */
+    .row2 { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
+    .row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; }
+    @media(max-width:720px){ .row2,.row3 { grid-template-columns:1fr; } }
+
+    /* ── DROP ZONE ── */
+    .drop-zone {
+      border:1.5px dashed rgba(255,255,255,.1); border-radius:10px;
+      padding:1.4rem 1rem; text-align:center; cursor:pointer;
+      transition:border-color .2s,background .2s;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      min-height:110px; background:var(--bg); position:relative;
+    }
+    .drop-zone:hover, .drop-zone.over { border-color:var(--teal); background:var(--teal-dim); }
+    .drop-zone.filled { border-color:rgba(0,230,118,.4); border-style:solid; background:var(--green-dim); }
+    .drop-icon { font-size:22px; margin-bottom:.45rem; }
+    .drop-title { font-family:'Syne',sans-serif; font-size:.82rem; font-weight:700; margin-bottom:.18rem; }
+    .drop-sub   { font-size:.68rem; color:var(--muted); }
+    .drop-fname {
+      font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--green);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:90%; margin-top:.3rem;
+    }
+    input[type="file"] { display:none; }
+
+    /* ── JSON EDITOR ── */
+    .json-wrap { position:relative; }
+    textarea {
+      width:100%; background:var(--bg); border:1px solid var(--border);
+      border-radius:9px; color:var(--text); font-family:'JetBrains Mono',monospace;
+      font-size:.73rem; padding:.75rem .9rem; outline:none; resize:vertical;
+      transition:border-color .2s,box-shadow .2s; line-height:1.6;
+    }
+    textarea:focus { border-color:var(--teal); box-shadow:0 0 0 3px var(--teal-dim); }
+    .json-status {
+      position:absolute; top:.6rem; right:.6rem;
+      font-family:'JetBrains Mono',monospace; font-size:.62rem;
+      padding:.15rem .5rem; border-radius:5px; transition:all .2s;
+    }
+    .json-status.valid   { background:var(--green-dim); color:var(--green); border:1px solid rgba(0,230,118,.2); }
+    .json-status.invalid { background:var(--red-dim);   color:var(--red);   border:1px solid rgba(255,77,109,.2); }
+    .json-status.idle    { background:var(--bg3); color:var(--muted); border:1px solid var(--border); }
+    .json-meta { display:flex; gap:.6rem; flex-wrap:wrap; }
+    .json-pill {
+      font-family:'JetBrains Mono',monospace; font-size:.62rem;
+      background:var(--bg3); border:1px solid var(--border2);
+      border-radius:6px; padding:.2rem .55rem; color:var(--muted);
+    }
+    .json-pill.highlight { color:var(--teal); border-color:rgba(0,212,170,.3); background:var(--teal-dim); }
+
+    /* ── NUMBER INPUT ── */
+    input[type="number"], input[type="text"] {
+      background:var(--bg3); border:1px solid var(--border); border-radius:8px;
+      color:var(--text); font-family:'JetBrains Mono',monospace; font-size:.8rem;
+      padding:.48rem .8rem; outline:none; width:100%;
+      transition:border-color .2s,box-shadow .2s;
+    }
+    input[type="number"]:focus, input[type="text"]:focus {
+      border-color:var(--teal); box-shadow:0 0 0 3px var(--teal-dim);
+    }
+
+    /* ── SUBMIT BTN ── */
+    .proc-btn {
+      display:flex; align-items:center; justify-content:center; gap:.6rem;
+      background:linear-gradient(135deg,var(--teal),#007aff); color:#000;
+      border:none; padding:.85rem 2.2rem; border-radius:10px;
+      font-family:'Syne',sans-serif; font-size:.95rem; font-weight:800;
+      cursor:pointer; transition:opacity .2s,transform .1s,box-shadow .2s;
+      box-shadow:0 4px 20px var(--teal-glow); width:100%;
+    }
+    .proc-btn:hover:not(:disabled) { opacity:.9; transform:translateY(-1px); }
+    .proc-btn:disabled { opacity:.35; cursor:not-allowed; transform:none; }
+
+    /* ── SPIN ── */
+    .spin { display:inline-block; width:14px; height:14px; border:2px solid rgba(0,0,0,.2); border-top-color:rgba(0,0,0,.75); border-radius:50%; animation:_spin .65s linear infinite; }
+    @keyframes _spin { to{transform:rotate(360deg);} }
+
+    /* ── ERR / SUCCESS ── */
+    .err-box {
+      background:var(--red-dim); border:1px solid rgba(255,77,109,.22);
+      border-radius:9px; padding:.7rem .9rem; font-size:.78rem;
+      color:var(--red); display:none; align-items:flex-start; gap:.5rem;
+    }
+    .err-box.show { display:flex; }
+    .suc-box {
+      background:var(--green-dim); border:1px solid rgba(0,230,118,.2);
+      border-radius:9px; padding:.7rem .9rem; font-size:.78rem;
+      color:var(--green); display:none; align-items:center; gap:.6rem; flex-wrap:wrap;
+    }
+    .suc-box.show { display:flex; }
+
+    /* ── STATS GRID ── */
+    .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:.7rem; }
+    @media(max-width:600px){ .stats-grid { grid-template-columns:1fr 1fr; } }
+    .stat-tile {
+      background:var(--bg3); border:1px solid var(--border); border-radius:9px;
+      padding:.75rem 1rem; display:flex; flex-direction:column; gap:.25rem;
+    }
+    .stat-val { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:800; color:var(--teal); }
+    .stat-val.amber { color:var(--amber); }
+    .stat-val.red   { color:var(--red); }
+    .stat-lbl { font-family:'JetBrains Mono',monospace; font-size:.62rem; color:var(--muted); }
+
+    /* ── DL BUTTON ── */
+    .dl-btn {
+      display:inline-flex; align-items:center; gap:.5rem;
+      background:linear-gradient(135deg,var(--amber),#c87d00); color:#0a0600;
+      border:none; padding:.65rem 1.5rem; border-radius:9px;
+      font-family:'Syne',sans-serif; font-size:.85rem; font-weight:800;
+      cursor:pointer; box-shadow:0 4px 16px rgba(245,166,35,.25);
+      transition:opacity .2s,transform .1s; text-decoration:none;
+    }
+    .dl-btn:hover { opacity:.9; transform:translateY(-1px); }
+
+    /* ── RULES HINT ── */
+    .rules-hint {
+      background:var(--bg3); border:1px solid var(--border); border-radius:9px;
+      padding:.75rem 1rem; font-size:.72rem; color:var(--muted); line-height:1.7;
+    }
+    .rules-hint code { font-family:'JetBrains Mono',monospace; color:var(--amber); background:rgba(245,166,35,.1); padding:.05rem .3rem; border-radius:4px; }
+    .rules-hint strong { color:var(--text); }
+
+    /* ── RULES TABLE EDITOR ── */
+    .rte-layout { display:grid; grid-template-columns:1fr 360px; gap:1.2rem; }
+    @media(max-width:960px){ .rte-layout { grid-template-columns:1fr; } }
+
+    /* Table side */
+    .rte-table-wrap { display:flex; flex-direction:column; gap:.7rem; }
+    .rte-toolbar { display:flex; align-items:center; gap:.55rem; flex-wrap:wrap; }
+    .rte-count { font-family:'JetBrains Mono',monospace; font-size:.68rem; color:var(--muted); margin-right:auto; }
+    .rte-count span { color:var(--teal); font-weight:600; }
+    .tbl-scroll { overflow-x:auto; border:1px solid var(--border2); border-radius:10px; background:var(--bg); }
+    .rte-table { width:100%; border-collapse:collapse; min-width:780px; }
+    .rte-table thead tr { background:var(--bg3); }
+    .rte-table th {
+      padding:.55rem .75rem; font-family:'JetBrains Mono',monospace;
+      font-size:.58rem; font-weight:500; color:var(--muted);
+      text-transform:uppercase; letter-spacing:.1em; text-align:left;
+      border-bottom:1px solid var(--border2); white-space:nowrap;
+    }
+    .rte-table th:last-child { width:40px; text-align:center; }
+    .rte-table tbody tr { border-bottom:1px solid var(--border); transition:background .1s; animation:rteRowIn .2s ease both; }
+    .rte-table tbody tr:last-child { border-bottom:none; }
+    .rte-table tbody tr:hover { background:rgba(255,255,255,.02); }
+    @keyframes rteRowIn { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:translateX(0)} }
+    .rte-table td { padding:.38rem .6rem; vertical-align:middle; font-size:.72rem; }
+    .rte-row-num { font-family:'JetBrains Mono',monospace; font-size:.58rem; color:var(--muted2); text-align:center; }
+
+    /* LOB badge */
+    .lob-badge {
+      display:inline-flex; align-items:center; padding:.18rem .55rem; border-radius:5px;
+      font-family:'JetBrains Mono',monospace; font-size:.65rem; font-weight:600; white-space:nowrap;
+    }
+    .lob-TW     { background:rgba(77,159,255,.1); color:#4d9fff; border:1px solid rgba(77,159,255,.2); }
+    .lob-PC     { background:rgba(0,212,170,.1);  color:var(--teal); border:1px solid rgba(0,212,170,.2); }
+    .lob-CV     { background:rgba(245,166,35,.1); color:var(--amber); border:1px solid rgba(245,166,35,.2); }
+    .lob-BUS    { background:rgba(167,139,250,.1);color:var(--purple); border:1px solid rgba(167,139,250,.2); }
+    .lob-TAXI   { background:rgba(251,191,36,.1); color:#fbbf24; border:1px solid rgba(251,191,36,.2); }
+    .lob-MISD   { background:rgba(255,77,109,.1); color:var(--red); border:1px solid rgba(255,77,109,.2); }
+
+    /* PO chip */
+    .po-chip {
+      display:inline-flex; align-items:center; padding:.18rem .55rem; border-radius:5px;
+      font-family:'JetBrains Mono',monospace; font-size:.68rem; font-weight:500; white-space:nowrap;
+    }
+    .po-neg   { background:var(--red-dim);   color:#f87171; border:1px solid rgba(255,77,109,.18); }
+    .po-pct   { background:var(--teal-dim);  color:var(--teal); border:1px solid rgba(0,212,170,.2); }
+    .po-fixed { background:rgba(167,139,250,.08); color:var(--purple); border:1px solid rgba(167,139,250,.2); }
+    .po-other { background:var(--bg3); color:var(--muted); border:1px solid var(--border2); }
+
+    /* range badge */
+    .rem-badge {
+      display:inline-flex; align-items:center; padding:.15rem .5rem; border-radius:5px;
+      font-family:'JetBrains Mono',monospace; font-size:.62rem;
+      background:var(--bg3); color:var(--muted); border:1px solid var(--border2); white-space:nowrap;
+    }
+    .rem-badge.nil { color:var(--blue); background:rgba(77,159,255,.08); border-color:rgba(77,159,255,.18); }
+
+    .ins-cell { font-family:'JetBrains Mono',monospace; font-size:.68rem; }
+    .ins-all  { color:var(--teal); }
+    .ins-rest { color:var(--amber); }
+
+    .tbl-rm-btn {
+      width:26px; height:26px; border-radius:5px; border:none; background:transparent;
+      cursor:pointer; color:var(--muted2); display:flex; align-items:center; justify-content:center;
+      margin:0 auto; font-size:.85rem; transition:all .12s;
+    }
+    .tbl-rm-btn:hover { background:var(--red-dim); color:var(--red); }
+
+    .rte-empty { padding:2.5rem; text-align:center; }
+    .rte-empty .ei { font-size:2rem; opacity:.25; margin-bottom:.5rem; }
+    .rte-empty .et { font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--muted); }
+
+    /* Form side */
+    .rte-form { display:flex; flex-direction:column; gap:.75rem; background:var(--bg3); border:1px solid var(--border2); border-radius:10px; padding:1.1rem; }
+    .rte-form-title { font-family:'JetBrains Mono',monospace; font-size:.62rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; padding-bottom:.6rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+    .rte-form-title span { color:var(--teal); }
+
+    .rte-flbl { font-family:'JetBrains Mono',monospace; font-size:.6rem; font-weight:500; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-bottom:.28rem; }
+
+    .rte-select, .rte-input {
+      background:var(--bg); border:1px solid var(--border2); border-radius:7px;
+      color:var(--text); font-family:'JetBrains Mono',monospace; font-size:.73rem;
+      padding:.42rem .65rem; outline:none; width:100%;
+      transition:border-color .18s, box-shadow .18s;
+    }
+    .rte-select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5L9 0z' fill='rgba(232,234,240,.3)'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right .6rem center; padding-right:1.8rem; appearance:none; }
+    .rte-select:focus, .rte-input:focus { border-color:var(--teal); box-shadow:0 0 0 2px var(--teal-dim); }
+    .rte-select option { background:#161820; }
+
+    /* PO type tabs */
+    .po-tabs { display:flex; gap:.3rem; flex-wrap:wrap; }
+    .po-tab {
+      flex:1; min-width:60px; padding:.3rem .4rem; border-radius:6px; font-size:.62rem; font-weight:600;
+      font-family:'JetBrains Mono',monospace; border:1px solid var(--border2);
+      color:var(--muted); background:var(--bg); cursor:pointer; text-align:center; transition:all .12s;
+    }
+    .po-tab:hover { border-color:var(--teal); color:var(--teal); background:var(--teal-dim); }
+    .po-tab.on { background:var(--teal); border-color:var(--teal); color:#000; }
+
+    /* Range type tabs */
+    .rng-tabs { display:flex; gap:.3rem; flex-wrap:wrap; margin-bottom:.4rem; }
+    .rng-tab {
+      flex:1; min-width:48px; padding:.28rem .35rem; border-radius:5px; font-size:.6rem; font-weight:600;
+      font-family:'JetBrains Mono',monospace; border:1px solid var(--border2);
+      color:var(--muted); background:var(--bg); cursor:pointer; text-align:center; transition:all .12s;
+    }
+    .rng-tab:hover { border-color:var(--blue); color:var(--blue); background:rgba(77,159,255,.08); }
+    .rng-tab.on { background:var(--blue); border-color:var(--blue); color:#000; }
+
+    .rng-inputs { display:flex; align-items:center; gap:.4rem; }
+    .rng-inputs .rte-input { width:85px; flex-shrink:0; }
+    .rng-sep { font-family:'JetBrains Mono',monospace; font-size:.68rem; color:var(--muted); white-space:nowrap; flex-shrink:0; }
+
+    /* form add btn */
+    .rte-add-btn {
+      width:100%; padding:.6rem; border-radius:7px; border:none; cursor:pointer;
+      background:linear-gradient(135deg,var(--teal),#007aff); color:#000;
+      font-family:'Syne',sans-serif; font-size:.82rem; font-weight:800;
+      display:flex; align-items:center; justify-content:center; gap:.35rem;
+      transition:opacity .15s, transform .1s, box-shadow .15s;
+      box-shadow:0 3px 12px var(--teal-glow);
+    }
+    .rte-add-btn:hover { opacity:.88; transform:translateY(-1px); }
+    .rte-add-btn:disabled { opacity:.3; cursor:not-allowed; transform:none; }
+
+    .rte-val-err {
+      font-family:'JetBrains Mono',monospace; font-size:.63rem; color:var(--red);
+      background:var(--red-dim); border:1px solid rgba(255,77,109,.18); border-radius:6px;
+      padding:.3rem .55rem; display:none;
+    }
+    .rte-val-err.show { display:block; }
+
+    /* ghost small buttons */
+    .g-btn {
+      padding:.3rem .65rem; border-radius:6px; font-size:.65rem; font-weight:600;
+      font-family:'JetBrains Mono',monospace; border:1px solid var(--border2);
+      color:var(--muted); background:transparent; cursor:pointer; transition:all .13s; white-space:nowrap;
+    }
+    .g-btn:hover { border-color:var(--teal); color:var(--teal); background:var(--teal-dim); }
+    .g-btn.danger:hover { border-color:var(--red); color:var(--red); background:var(--red-dim); }
+
+    /* json summary bar */
+    .rte-json-bar {
+      display:flex; align-items:center; gap:.55rem; flex-wrap:wrap;
+      padding:.5rem .7rem; background:var(--bg3); border:1px solid var(--border);
+      border-radius:8px; margin-top:.3rem;
+    }
+    .rte-json-status { font-family:'JetBrains Mono',monospace; font-size:.65rem; }
+    .rte-json-status.ok  { color:var(--green); }
+    .rte-json-status.bad { color:var(--red); }
+    .rte-json-pill {
+      font-family:'JetBrains Mono',monospace; font-size:.6rem;
+      background:var(--bg); border:1px solid var(--border2); border-radius:5px;
+      padding:.15rem .5rem; color:var(--muted);
+    }
+    .rte-json-pill.hi { color:var(--teal); border-color:rgba(0,212,170,.28); background:var(--teal-dim); }
+    .rte-divider { height:1px; background:var(--border); }
+    /* hidden textarea keeps the existing JS working */
+    #rulesJson { display:none; }
+  </style>
+</head>
+<body>
+
+<!-- ── TOPBAR ── -->
+<header class="topbar">
+  <div class="logo-mark">💹</div>
+  <span class="topbar-title">Payout Recalculator</span>
+  <span class="topbar-sub">PayinConfig → Calculated Payout</span>
+  <div class="topbar-right">
+    <span class="version-pill">v2.0</span>
+  </div>
+</header>
+
+<!-- ── MAIN ── -->
+<main class="main">
+<div class="page">
+
+  <!-- ── STEP 1: File Uploads ── -->
+  <div class="card">
+    <div class="card-head">
+      <span class="step-badge">1</span>
+      <h2>Upload Files</h2>
+      <span class="sub">PayinConfig</span>
+    </div>
+    <div class="card-body">
+      <div class="row2" style="grid-template-columns:1fr;">
+        <!-- PayinConfig -->
+        <div>
+          <div class="lbl">PayinConfig File <span class="req">*</span></div>
+          <div class="drop-zone" id="dropPayin" onclick="document.getElementById('payinInput').click()">
+            <div class="drop-icon">📊</div>
+            <div class="drop-title">Drop PayinConfig here</div>
+            <div class="drop-sub">.xlsx or .xls</div>
+            <div class="drop-fname" id="payinName"></div>
+          </div>
+          <input type="file" id="payinInput" accept=".xlsx,.xls" onchange="handleFile(this,'payin')">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: Payout Rules Table Editor ── -->
+  <div class="card">
+    <div class="card-head">
+      <span class="step-badge" style="background:var(--purple)">2</span>
+      <h2>Payout Rules</h2>
+      <span class="sub">Build rules using the table — JSON is auto-generated</span>
+    </div>
+    <div class="card-body">
+
+      <div class="rte-layout">
+
+        <!-- ── LEFT: TABLE ── -->
+        <div class="rte-table-wrap">
+          <div class="rte-toolbar">
+            <span class="rte-count"><span id="rteCount">0</span> rules</span>
+            <button class="g-btn" onclick="rteLoadDefaults()">↺ Defaults</button>
+            <button class="g-btn danger" onclick="rteClearAll()">🗑 Clear</button>
+          </div>
+
+          <div class="tbl-scroll">
+            <table class="rte-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>LOB</th>
+                  <th>Segment</th>
+                  <th>Insurer</th>
+                  <th>PO Formula</th>
+                  <th>Range</th>
+                  <th>✕</th>
+                </tr>
+              </thead>
+              <tbody id="rteBody">
+                <tr><td colspan="7"><div class="rte-empty"><div class="ei">📭</div><div class="et">No rules yet — add using the form →</div></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- JSON status bar -->
+          <div class="rte-json-bar">
+            <span class="rte-json-status ok" id="rteJsonStatus">✓ 0 rules</span>
+            <span class="rte-json-pill hi" id="rteJsonLobs"></span>
+          </div>
+        </div>
+
+        <!-- ── RIGHT: ADD FORM ── -->
+        <div class="rte-form">
+          <div class="rte-form-title">Add Rule</div>
+
+          <!-- LOB -->
+          <div id="rteLobWrap">
+            <div class="rte-flbl">LOB *</div>
+            <select class="rte-select" id="rteLob" onchange="rteOnLobChange()">
+              <option value="">— Select LOB —</option>
+              <option value="TW">TW — Two Wheeler</option>
+              <option value="PVT CAR">PVT CAR — Private Car</option>
+              <option value="GCV, PCV 3W">CV — Goods / Passenger 3W</option>
+              <option value="BUS">BUS — Bus</option>
+              <option value="TAXI">TAXI — Taxi / Cab</option>
+              <option value="MISD">MISD — Miscellaneous</option>
+            </select>
+          </div>
+
+          <!-- Segment -->
+          <div>
+            <div class="rte-flbl">Segment *</div>
+            <select class="rte-select" id="rteSeg">
+              <option value="">— Select LOB first —</option>
+            </select>
+          </div>
+
+          <!-- Insurer -->
+          <div>
+            <div class="rte-flbl">Insurer *</div>
+            <select class="rte-select" id="rteInsType" onchange="rteOnInsChange()">
+              <option value="All Companies">All Companies</option>
+              <option value="Rest of Companies">Rest of Companies</option>
+              <option value="custom">Custom…</option>
+            </select>
+            <input class="rte-input" type="text" id="rteInsCustom" placeholder="e.g. ICICI, TATA, HDFC" style="display:none;margin-top:.35rem;"/>
+          </div>
+
+          <div class="rte-divider"></div>
+
+          <!-- PO Formula -->
+          <div>
+            <div class="rte-flbl">PO Formula *</div>
+            <div class="po-tabs">
+              <button class="po-tab on" data-pt="pct"     onclick="rteSelPoType(this)">% Payin</button>
+              <button class="po-tab"    data-pt="deduct"  onclick="rteSelPoType(this)">Deduct</button>
+              <button class="po-tab"    data-pt="fixed"   onclick="rteSelPoType(this)">Fixed</button>
+              <button class="po-tab"    data-pt="special" onclick="rteSelPoType(this)">Special</button>
+            </div>
+            <div id="rtePoInputs" style="margin-top:.4rem;"></div>
+          </div>
+
+          <div class="rte-divider"></div>
+
+          <!-- Range -->
+          <div>
+            <div class="rte-flbl">Payin Range</div>
+            <div class="rng-tabs">
+              <button class="rng-tab on"  data-rt="nil"     onclick="rteSelRng(this)">NIL</button>
+              <button class="rng-tab"     data-rt="below"   onclick="rteSelRng(this)">Below</button>
+              <button class="rng-tab"     data-rt="range"   onclick="rteSelRng(this)">Range</button>
+              <button class="rng-tab"     data-rt="above"   onclick="rteSelRng(this)">Above</button>
+              <button class="rng-tab"     data-rt="allfuel" onclick="rteSelRng(this)">All Fuel</button>
+            </div>
+            <div class="rng-inputs" id="rteRngInputs" style="display:none;">
+              <input class="rte-input" type="number" id="rteRngLo" placeholder="From%" min="0" max="100" step="0.5"/>
+              <span class="rng-sep" id="rteRngSep">to</span>
+              <input class="rte-input" type="number" id="rteRngHi" placeholder="To%" min="0" max="100" step="0.5"/>
+            </div>
+          </div>
+
+          <!-- Validation error -->
+          <div class="rte-val-err" id="rteValErr">Please fill all required fields.</div>
+
+          <!-- Add button -->
+          <button class="rte-add-btn" onclick="rteAddRule()">＋ Add Rule</button>
+        </div>
+      </div>
+
+      <!-- Hidden textarea — keeps existing server-send JS working unchanged -->
+      <textarea id="rulesJson" style="display:none"></textarea>
+      <div class="json-meta" id="jsonMeta" style="display:none">
+        <span class="json-pill" id="metaTotal"></span>
+        <span class="json-pill highlight" id="metaLobs"></span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── STEP 4: Advanced Settings ── -->
+  <div class="card">
+    <div class="card-head">
+      <span class="step-badge amber">3</span>
+      <h2>Advanced Settings</h2>
+      <span class="sub">Optional — defaults are pre-filled</span>
+    </div>
+    <div class="card-body" style="display:flex;flex-direction:column;gap:1.1rem;">
+
+      <!-- Payin threshold -->
+      <div class="adv-row">
+        <div class="adv-field">
+          <div class="lbl">Payin ≤ threshold → 0 <span class="opt">optional</span></div>
+          <input type="number" id="payinMin" value="5" min="0" step="0.5"
+                 title="Payin at or below this value → calculated payout = 0" style="max-width:160px">
+        </div>
+        <div class="adv-seg-col">
+          <div class="adv-seg-title">Apply to segments <span class="opt">all if none selected</span></div>
+          <div class="adv-seg-chips" id="threshSegs"></div>
+        </div>
+      </div>
+
+      <div class="adv-divider"></div>
+
+      <!-- IRDA Private Car -->
+      <div class="adv-row">
+        <div class="adv-field">
+          <div class="lbl">IRDA rate — Private Car OD <span class="opt">optional</span></div>
+          <input type="number" id="irdaPvtCar" value="15" min="0" step="0.5"
+                 title="Private Car OD payin at exactly this rate → payout = 0" style="max-width:160px">
+        </div>
+        <div class="adv-seg-col">
+          <div class="adv-seg-title">Apply to segments <span class="opt">all if none selected</span></div>
+          <div class="adv-seg-chips" id="irdaPvtSegs"></div>
+        </div>
+      </div>
+
+      <div class="adv-divider"></div>
+
+      <!-- IRDA Two Wheeler -->
+      <div class="adv-row">
+        <div class="adv-field">
+          <div class="lbl">IRDA rate — Two Wheeler OD <span class="opt">optional</span></div>
+          <input type="number" id="irdaTw" value="17.5" min="0" step="0.5"
+                 title="Two Wheeler OD payin at exactly this rate → payout = 0" style="max-width:160px">
+        </div>
+        <div class="adv-seg-col">
+          <div class="adv-seg-title">Apply to segments <span class="opt">all if none selected</span></div>
+          <div class="adv-seg-chips" id="irdaTwSegs"></div>
+        </div>
+      </div>
+
+      <div class="rules-hint" style="font-size:.68rem;">
+        <strong>Payin ≤ threshold:</strong> Rows where payin_od_rate or payin_tp_rate ≤ this value will have <code>calculated = 0</code>. &nbsp;
+        <strong>IRDA rates:</strong> These exact OD payin values are IRDA-regulated fixed rates — no payout is processed (OD only; TP still uses the formula).
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 5: Process ── -->
+  <div class="card">
+    <div class="card-head">
+      <span class="step-badge">4</span>
+      <h2>Run Recalculation</h2>
+    </div>
+    <div class="card-body">
+
+      <div class="err-box" id="errBox">
+        <span>⚠️</span>
+        <span id="errMsg">Something went wrong.</span>
+      </div>
+
+      <div class="suc-box" id="sucBox">
+        <span>✅</span>
+        <span id="sucMsg">Done! File ready.</span>
+        <a class="dl-btn" id="dlBtn" href="#" download>⬇ Download Excel</a>
+      </div>
+
+      <div class="prog-wrap" id="progWrap">
+        <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+        <div class="prog-text" id="progText">Processing…</div>
+      </div>
+
+      <!-- Stats -->
+      <div id="statsArea" style="display:none">
+        <div class="stats-grid">
+          <div class="stat-tile">
+            <div class="stat-val" id="sTotalRows">—</div>
+            <div class="stat-lbl">Total Rows</div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-val" id="sOdChanged">—</div>
+            <div class="stat-lbl">OD Changed</div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-val" id="sTpChanged">—</div>
+            <div class="stat-lbl">TP Changed</div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-val amber" id="sChangedPayout">—</div>
+            <div class="stat-lbl">Rows with Changed Payout</div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-val" id="sOdProcessed">—</div>
+            <div class="stat-lbl">OD Rows Processed</div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-val" id="sTpProcessed">—</div>
+            <div class="stat-lbl">TP Rows Processed</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="proc-btn" id="procBtn" onclick="runProcess()" disabled>
+        <span id="procBtnIcon">⚡</span>
+        <span id="procBtnText">Recalculate Payout</span>
+      </button>
+
+    </div>
+  </div>
+
+</div>
+</main>
+
+<footer>
+  <span>Payout Recalculator</span>
+  <span>PayIn <= 5 -> 0 | IRDA OD 15/17.5 -> 0</span>
+</footer>
+
+<script>
+/* ============================================================
+   ADVANCED SETTINGS — SEGMENT CHIPS
+============================================================ */
+const ADV_SEGMENTS = [
+  { id:'pvtcar',   label:'PVT CAR' },
+  { id:'tw',       label:'TW' },
+  { id:'gcv',      label:'CV / GCV' },
+  { id:'pcv',      label:'PCV' },
+  { id:'taxi',     label:'TAXI' },
+  { id:'bus',      label:'BUS' },
+  { id:'misd',     label:'MISD' },
+  { id:'all',      label:'All' },
+];
+
+// Build chips for a container
+function buildSegChips(containerId) {
+  const wrap = document.getElementById(containerId);
+  ADV_SEGMENTS.forEach(seg => {
+    const btn = document.createElement('button');
+    btn.className = 'seg-chip';
+    btn.dataset.seg = seg.id;
+    btn.textContent = seg.label;
+    btn.onclick = () => {
+      // "All" is exclusive — toggles all others off
+      if (seg.id === 'all') {
+        const wasOn = btn.classList.contains('on');
+        wrap.querySelectorAll('.seg-chip').forEach(b => b.classList.remove('on'));
+        if (!wasOn) btn.classList.add('on');
+      } else {
+        // Deselect "All" if individual chosen
+        const allBtn = wrap.querySelector('[data-seg="all"]');
+        if (allBtn) allBtn.classList.remove('on');
+        btn.classList.toggle('on');
+      }
+    };
+    wrap.appendChild(btn);
+  });
+}
+
+buildSegChips('threshSegs');
+buildSegChips('irdaPvtSegs');
+buildSegChips('irdaTwSegs');
+
+function getSelectedSegs(containerId) {
+  const chips = [...document.querySelectorAll(`#${containerId} .seg-chip.on`)];
+  if (!chips.length) return '';
+  const ids = chips.map(c => c.dataset.seg);
+  if (ids.includes('all')) return 'ALL';
+  return chips.map(c => c.textContent).join(',');
+}
+
+const state = {
+  payinFile: null,
+  rulesValid: false,
+  processing: false,
+  resultBlob: null,
+  resultName: '',
+};
+
+/* ============================================================
+   FILE DROP / SELECT
+============================================================ */
+function handleFile(input, which) {
+  const file = input.files[0];
+  if (!file) return;
+  const isXls = /\.(xlsx|xls)$/i.test(file.name);
+  if (!isXls) { showErr('Only .xlsx / .xls files are supported.'); return; }
+
+  if (which === 'payin') {
+    state.payinFile = file;
+    document.getElementById('dropPayin').classList.add('filled');
+    document.getElementById('payinName').textContent = '✓ ' + file.name;
+  }
+  updateBtn();
+}
+
+// Drag & drop
+['dropPayin'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('over'); });
+  el.addEventListener('dragleave', () => el.classList.remove('over'));
+  el.addEventListener('drop', e => {
+    e.preventDefault(); el.classList.remove('over');
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    const which = 'payin';
+    const fakeInput = { files: [file] };
+    handleFile(fakeInput, which);
+    if (which === 'payin') document.getElementById('payinInput').files = e.dataTransfer.files;
+  });
+});
+
+/* ============================================================
+   RULES TABLE EDITOR
+============================================================ */
+let rteRules = [];
+let rtePoType  = 'pct';
+let rteRngType = 'nil';
+
+const RTE_SEGMENTS = {
+  'TW':          ['TW SAOD + COMP','TW TP','TW 1+5'],
+  'PVT CAR':     ['PVT CAR COMP + SAOD','PVT CAR TP','PVT CAR 1+3'],
+  'GCV, PCV 3W': ['All GVW & PCV 3W, GCV 3W','Upto 2.5 GVW','PCV 3W','GCV 3W'],
+  'BUS':         ['SCHOOL BUS','STAFF BUS'],
+  'TAXI':        ['TAXI'],
+  'MISD':        ['Misd, Tractor'],
+};
+
+/* ── LOB → segment options ── */
+function rteOnLobChange() {
+  rteUpdateSegOptions(document.getElementById('rteLob').value);
+}
+function rteUpdateSegOptions(lob) {
+  const sel = document.getElementById('rteSeg');
+  sel.innerHTML = '';
+  const segs = RTE_SEGMENTS[lob] || [];
+  if (!segs.length) { sel.innerHTML = '<option value="">— select LOB first —</option>'; return; }
+  segs.forEach(s => { const o=document.createElement('option'); o.value=s; o.textContent=s; sel.appendChild(o); });
+  if (segs.length===1) sel.value=segs[0];
+}
+
+/* ── insurer type ── */
+function rteOnInsChange() {
+  const v = document.getElementById('rteInsType').value;
+  document.getElementById('rteInsCustom').style.display = v==='custom' ? '' : 'none';
+}
+
+/* ── PO type ── */
+function rteSelPoType(btn) {
+  document.querySelectorAll('.po-tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  rtePoType = btn.dataset.pt;
+  rteRenderPoInputs();
+}
+function rteRenderPoInputs() {
+  const wrap = document.getElementById('rtePoInputs');
+  if (rtePoType==='pct')
+    wrap.innerHTML=`<div style="display:flex;align-items:center;gap:.4rem"><input class="rte-input" type="number" id="rtePoPct" placeholder="e.g. 88" min="1" max="200" step="0.5" style="width:110px"/><span style="font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted)">% of Payin</span></div>`;
+  else if (rtePoType==='deduct')
+    wrap.innerHTML=`<div style="display:flex;align-items:center;gap:.4rem"><span style="font-family:'JetBrains Mono',monospace;font-size:.85rem;color:#f87171">−</span><input class="rte-input" type="number" id="rtePoDed" placeholder="e.g. 3" min="0.1" max="50" step="0.5" style="width:110px"/><span style="font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted)">% from payin</span></div>`;
+  else if (rtePoType==='fixed')
+    wrap.innerHTML=`<div style="display:flex;align-items:center;gap:.4rem"><input class="rte-input" type="number" id="rtePoFixed" placeholder="e.g. 21" min="0" max="200" step="0.5" style="width:110px"/><span style="font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted)">% PO (fixed)</span></div>`;
+  else
+    wrap.innerHTML=`<select class="rte-select" id="rtePoSpecial"><option value="Payin + 1">Payin + 1</option><option value="Less 2% of Payin">Less 2% of Payin</option></select>`;
+}
+function rteGetPoValue() {
+  if (rtePoType==='pct')    { const v=document.getElementById('rtePoPct')?.value;   return v?`${v}% of Payin`:null; }
+  if (rtePoType==='deduct') { const v=document.getElementById('rtePoDed')?.value;   return v?`-${v}%`:null; }
+  if (rtePoType==='fixed')  { const v=document.getElementById('rtePoFixed')?.value; return v?`${v}% PO`:null; }
+  return document.getElementById('rtePoSpecial')?.value||null;
+}
+
+/* ── Range type ── */
+function rteSelRng(btn) {
+  document.querySelectorAll('.rng-tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  rteRngType = btn.dataset.rt;
+  rteRenderRngInputs();
+}
+function rteRenderRngInputs() {
+  const wrap=document.getElementById('rteRngInputs');
+  const lo=document.getElementById('rteRngLo');
+  const hi=document.getElementById('rteRngHi');
+  const sep=document.getElementById('rteRngSep');
+  if (rteRngType==='nil'||rteRngType==='allfuel') { wrap.style.display='none'; return; }
+  wrap.style.display='flex';
+  if (rteRngType==='below') { lo.style.display='none'; sep.style.display='none'; hi.style.display=''; hi.placeholder='Below %'; }
+  else if (rteRngType==='above') { hi.style.display='none'; sep.style.display='none'; lo.style.display=''; lo.placeholder='Above %'; }
+  else { lo.style.display=''; hi.style.display=''; sep.style.display=''; lo.placeholder='From %'; hi.placeholder='To %'; }
+}
+function rteGetRemarks() {
+  if (rteRngType==='nil')     return 'NIL';
+  if (rteRngType==='allfuel') return 'All Fuel';
+  const lo=document.getElementById('rteRngLo')?.value;
+  const hi=document.getElementById('rteRngHi')?.value;
+  if (rteRngType==='below') return hi  ? `Payin Below ${hi}%` : null;
+  if (rteRngType==='above') return lo  ? `Payin Above ${lo}%` : null;
+  if (rteRngType==='range') return (lo&&hi) ? `Payin ${lo}% to ${hi}%` : null;
+  return null;
+}
+
+/* ── Add rule ── */
+function rteAddRule() {
+  const errEl = document.getElementById('rteValErr');
+  errEl.classList.remove('show');
+
+  const po      = rteGetPoValue();
+  const remarks = rteGetRemarks();
+  let lob, seg, insurer;
+
+  lob = document.getElementById('rteLob').value;
+  if (!lob) { errEl.textContent='LOB is required'; errEl.classList.add('show'); return; }
+
+  seg = document.getElementById('rteSeg').value;
+  if (!seg) { errEl.textContent='Segment is required'; errEl.classList.add('show'); return; }
+
+  const insType = document.getElementById('rteInsType').value;
+  if (insType==='custom') {
+    insurer = (document.getElementById('rteInsCustom').value||'').trim();
+    if (!insurer) { errEl.textContent='Insurer name required'; errEl.classList.add('show'); return; }
+  } else { insurer=insType; }
+
+  if (!po)      { errEl.textContent='PO formula value required'; errEl.classList.add('show'); return; }
+  if (!remarks) { errEl.textContent='Range values required'; errEl.classList.add('show'); return; }
+
+  const rule = { LOB:lob, SEGMENT:seg, INSURER:insurer, PO:po, REMARKS:remarks };
+
+  rteRules.push(rule);
+  rteRender();
+  rteSyncJson();
+  rteResetForm();
+}
+
+/* ── Delete rule ── */
+function rteDelete(idx) {
+  rteRules.splice(idx,1);
+  rteRender();
+  rteSyncJson();
+}
+
+/* ── Render table ── */
+function rteRender() {
+  const tbody = document.getElementById('rteBody');
+  document.getElementById('rteCount').textContent = rteRules.length;
+  if (!rteRules.length) {
+    tbody.innerHTML='<tr><td colspan="7"><div class="rte-empty"><div class="ei">📭</div><div class="et">No rules yet — add using the form →</div></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = rteRules.map((r,i)=>{
+    const lobVal = r.LOB;
+    const cls = rtelobCls(r.LOB);
+    return `<tr style="animation-delay:${i*.03}s">
+      <td><div class="rte-row-num">${i+1}</div></td>
+      <td><span class="lob-badge lob-${cls}">${lobVal}</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:.68rem;">${r.SEGMENT}</td>
+      <td><span class="ins-cell ${r.INSURER==='All Companies'?'ins-all':r.INSURER==='Rest of Companies'?'ins-rest':''}">${r.INSURER}</span></td>
+      <td>${rteRenderPo(r.PO)}</td>
+      <td>${rteRenderRem(r.REMARKS)}</td>
+      <td><button class="tbl-rm-btn" onclick="rteDelete(${i})" title="Remove">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function rtelobCls(lob) {
+  if (!lob) return '';
+  if (lob==='TW') return 'TW';
+  if (lob==='PVT CAR') return 'PC';
+  if (lob.includes('GCV')||lob.includes('PCV')) return 'CV';
+  if (lob==='BUS') return 'BUS';
+  if (lob==='TAXI') return 'TAXI';
+  if (lob==='MISD') return 'MISD';
+  return '';
+}
+function rteRenderPo(po) {
+  const p=String(po).toUpperCase();
+  if (p.includes('% OF PAYIN')) { const m=p.match(/(\d+(?:\.\d+)?)%/); return `<span class="po-chip po-pct">${m?m[1]+'%':po} of Payin</span>`; }
+  if (/^-\d/.test(p)) return `<span class="po-chip po-neg">${po}</span>`;
+  if (p.includes('% PO')) { const m=p.match(/(\d+(?:\.\d+)?)%/); return `<span class="po-chip po-fixed">${m?m[1]+'%':po} fixed</span>`; }
+  return `<span class="po-chip po-other">${po}</span>`;
+}
+function rteRenderRem(rem) {
+  const r=String(rem).toUpperCase();
+  if (r==='NIL'||r==='ALL FUEL') return `<span class="rem-badge nil">${rem}</span>`;
+  return `<span class="rem-badge">${rem}</span>`;
+}
+
+/* ── Sync to hidden textarea + update button state ── */
+function rteSyncJson() {
+  const json = JSON.stringify(rteRules, null, 2);
+  document.getElementById('rulesJson').value = json;
+
+  // Update JSON bar
+  const lobs   = [...new Set(rteRules.map(r=>r.LOB).filter(Boolean))].sort();
+  document.getElementById('rteJsonStatus').textContent = `✓ ${rteRules.length} rules`;
+  document.getElementById('rteJsonLobs').textContent   = lobs.length ? `LOBs: ${lobs.join(' · ')}` : '';
+
+  // Mark as valid and update process button
+  state.rulesValid = rteRules.length > 0;
+  updateBtn();
+}
+
+/* ── Reset form ── */
+function rteResetForm() {
+  document.getElementById('rteLob').value = '';
+  document.getElementById('rteInsType').value = 'All Companies';
+  document.getElementById('rteInsCustom').style.display='none';
+  document.getElementById('rteInsCustom').value='';
+  rteUpdateSegOptions('');
+  rteSelPoType(document.querySelector('.po-tab[data-pt="pct"]'));
+  rteSelRng(document.querySelector('.rng-tab[data-rt="nil"]'));
+}
+
+/* ── Load defaults ── */
+function rteLoadDefaults() {
+  rteRules = [
+    {"LOB":"TW","SEGMENT":"TW SAOD + COMP","INSURER":"All Companies","PO":"88% of Payin","REMARKS":"NIL"},
+    {"LOB":"TW","SEGMENT":"TW SAOD + COMP","INSURER":"Tata- Comp","PO":"85% of Payin","REMARKS":"NIL"},
+    {"LOB":"TW","SEGMENT":"TW TP","INSURER":"All Companies","PO":"-3%","REMARKS":"Payin Below 30%"},
+    {"LOB":"TW","SEGMENT":"TW TP","INSURER":"All Companies","PO":"-4%","REMARKS":"Payin 31% to 50%"},
+    {"LOB":"TW","SEGMENT":"TW TP","INSURER":"All Companies","PO":"-5%","REMARKS":"Payin Above 50%"},
+    {"LOB":"PVT CAR","SEGMENT":"PVT CAR COMP + SAOD","INSURER":"All Companies","PO":"88% of Payin","REMARKS":"All Fuel"},
+    {"LOB":"PVT CAR","SEGMENT":"PVT CAR TP","INSURER":"All Companies","PO":"-3%","REMARKS":"Payin Below 30%"},
+    {"LOB":"PVT CAR","SEGMENT":"PVT CAR TP","INSURER":"All Companies","PO":"-4%","REMARKS":"Payin 31% to 50%"},
+    {"LOB":"PVT CAR","SEGMENT":"PVT CAR TP","INSURER":"All Companies","PO":"-5%","REMARKS":"Payin Above 50%"},
+    {"LOB":"PVT CAR","SEGMENT":"PVT CAR TP","INSURER":"ZUNO","PO":"21% PO","REMARKS":"NIL"},
+    {"LOB":"GCV, PCV 3W","SEGMENT":"Upto 2.5 GVW","INSURER":"Reliance, SBI","PO":"-3%","REMARKS":"NIL"},
+    {"LOB":"GCV, PCV 3W","SEGMENT":"All GVW & PCV 3W, GCV 3W","INSURER":"Rest of Companies","PO":"-3%","REMARKS":"Payin Below 30%"},
+    {"LOB":"GCV, PCV 3W","SEGMENT":"All GVW & PCV 3W, GCV 3W","INSURER":"Rest of Companies","PO":"-4%","REMARKS":"Payin 31% to 50%"},
+    {"LOB":"GCV, PCV 3W","SEGMENT":"All GVW & PCV 3W, GCV 3W","INSURER":"Rest of Companies","PO":"-5%","REMARKS":"Payin Above 50%"},
+    {"LOB":"BUS","SEGMENT":"SCHOOL BUS","INSURER":"Reliance, Digit, ICICI","PO":"Less 2% of Payin","REMARKS":"NIL"},
+    {"LOB":"BUS","SEGMENT":"SCHOOL BUS","INSURER":"TATA","PO":"Payin + 1","REMARKS":"NIL"},
+    {"LOB":"BUS","SEGMENT":"SCHOOL BUS","INSURER":"Rest of Companies","PO":"88% of Payin","REMARKS":"NIL"},
+    {"LOB":"BUS","SEGMENT":"STAFF BUS","INSURER":"All Companies","PO":"88% of Payin","REMARKS":"NIL"},
+    {"LOB":"TAXI","SEGMENT":"TAXI","INSURER":"All Companies","PO":"-3%","REMARKS":"Payin Below 30%"},
+    {"LOB":"TAXI","SEGMENT":"TAXI","INSURER":"All Companies","PO":"-4%","REMARKS":"Payin 31% to 50%"},
+    {"LOB":"TAXI","SEGMENT":"TAXI","INSURER":"All Companies","PO":"-5%","REMARKS":"Payin Above 50%"},
+    {"LOB":"MISD","SEGMENT":"Misd, Tractor","INSURER":"All Companies","PO":"88% of Payin","REMARKS":"NIL"},
+  ];
+  rteRender();
+  rteSyncJson();
+}
+
+/* ── Clear all ── */
+function rteClearAll() {
+  if (rteRules.length && !confirm('Clear all rules?')) return;
+  rteRules = [];
+  rteRender();
+  rteSyncJson();
+}
+
+/* validateJson/stub — keep for backward compat (no longer used) */
+function validateJson() {}
+async function _validateJson() {}
+
+/* ============================================================
+   BUTTON STATE
+============================================================ */
+function updateBtn() {
+  const ok = state.payinFile && state.rulesValid && !state.processing;
+  document.getElementById('procBtn').disabled = !ok;
+}
+
+/* ============================================================
+   PROCESS
+============================================================ */
+async function runProcess() {
+  if (state.processing) return;
+  state.processing = true;
+  updateBtn();
+  hideErr(); hideSuc();
+
+  // Show progress
+  const prog = document.getElementById('progWrap');
+  const fill = document.getElementById('progFill');
+  const txt  = document.getElementById('progText');
+  prog.classList.add('show');
+  fill.style.width = '0%';
+  txt.textContent  = 'Uploading files…';
+  document.getElementById('statsArea').style.display = 'none';
+
+  // Animate progress (fake while waiting)
+  let pct = 0;
+  const interval = setInterval(() => {
+    pct = Math.min(pct + 2, 85);
+    fill.style.width = pct + '%';
+    if      (pct < 20) txt.textContent = 'Uploading files…';
+    else if (pct < 50) txt.textContent = 'Loading data…';
+    else if (pct < 80) txt.textContent = 'Recalculating payout rows…';
+    else               txt.textContent = 'Finalising output…';
+  }, 180);
+
+  try {
+    const fd = new FormData();
+    fd.append('payin_file', state.payinFile);
+    fd.append('rules_json', document.getElementById('rulesJson').value.trim());
+    fd.append('payin_min',  document.getElementById('payinMin').value);
+    fd.append('irda_pvt_car', document.getElementById('irdaPvtCar').value);
+    fd.append('irda_tw',    document.getElementById('irdaTw').value);
+    fd.append('thresh_segs',    getSelectedSegs('threshSegs'));
+    fd.append('irda_pvt_segs',  getSelectedSegs('irdaPvtSegs'));
+    fd.append('irda_tw_segs',   getSelectedSegs('irdaTwSegs'));
+    const resp = await fetch('/process', { method: 'POST', body: fd });
+
+    clearInterval(interval);
+
+    if (!resp.ok) {
+      // Try to parse JSON error
+      let errText = `HTTP ${resp.status}`;
+      try { const e = await resp.json(); errText = e.error || errText; } catch {}
+      throw new Error(errText);
+    }
+
+    // Success — get the file blob
+    const blob = await resp.blob();
+    const disp  = resp.headers.get('Content-Disposition') || '';
+    const match = disp.match(/filename="?([^";\n]+)"?/);
+    state.resultName = match ? match[1] : 'recalculated.xlsx';
+    state.resultBlob = blob;
+
+    fill.style.width = '100%';
+    txt.textContent  = 'Complete!';
+
+    // Wire up download button
+    const url = URL.createObjectURL(blob);
+    const dlBtn = document.getElementById('dlBtn');
+    dlBtn.href = url;
+    dlBtn.download = state.resultName;
+
+    // Extract stats from response headers (we encode them there)
+    // Since we're sending a file, stats come back via headers
+    const hStats = resp.headers.get('X-Stats');
+    if (hStats) {
+      try {
+        const s = JSON.parse(decodeURIComponent(hStats));
+        showStats(s);
+      } catch {}
+    }
+
+    showSuc(`Recalculation complete — ${state.resultName}`);
+
+    setTimeout(() => { prog.classList.remove('show'); }, 1200);
+
+  } catch (e) {
+    clearInterval(interval);
+    fill.style.width = '0%';
+    prog.classList.remove('show');
+    showErr(e.message || 'Unknown error during processing.');
+  } finally {
+    state.processing = false;
+    updateBtn();
+  }
+}
+
+/* ============================================================
+   STATS
+============================================================ */
+function showStats(s) {
+  document.getElementById('sTotalRows').textContent    = fmt(s.total_rows);
+  document.getElementById('sOdChanged').textContent    = fmt(s.od_changed);
+  document.getElementById('sTpChanged').textContent    = fmt(s.tp_changed);
+  document.getElementById('sChangedPayout').textContent = fmt(s.changed_payout);
+  document.getElementById('sOdProcessed').textContent  = fmt(s.od_processed);
+  document.getElementById('sTpProcessed').textContent  = fmt(s.tp_processed);
+  document.getElementById('statsArea').style.display = 'block';
+}
+function fmt(n) { return typeof n === 'number' ? n.toLocaleString() : (n || '—'); }
+
+/* ============================================================
+   ERR / SUC
+============================================================ */
+function showErr(msg) {
+  const el = document.getElementById('errBox');
+  document.getElementById('errMsg').textContent = msg;
+  el.classList.add('show');
+}
+function hideErr() { document.getElementById('errBox').classList.remove('show'); }
+function showSuc(msg) {
+  const el = document.getElementById('sucBox');
+  document.getElementById('sucMsg').textContent = msg;
+  el.classList.add('show');
+}
+function hideSuc() { document.getElementById('sucBox').classList.remove('show'); }
+
+/* ── Init table editor on page load ── */
+rteRenderPoInputs();
+rteRenderRngInputs();
+rteLoadDefaults();
+</script>
+</body>
+</html>
