@@ -9,21 +9,16 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      /* Warm-dark palette — no cold blue-grays */
       --ink:      #0c0b0a;
       --ink2:     #121110;
       --ink3:     #1a1917;
       --ink4:     #242220;
       --ink5:     #2e2b28;
-
-      /* Saffron — the one accent */
       --saf:       #f0a500;
       --saf-dim:   rgba(240,165,0,.1);
       --saf-glow:  rgba(240,165,0,.28);
       --saf-mid:   rgba(240,165,0,.4);
       --saf-line:  rgba(240,165,0,.18);
-
-      /* Status */
       --em:        #2dd4a0;
       --em-dim:    rgba(45,212,160,.1);
       --rose:      #f26d6d;
@@ -32,18 +27,18 @@
       --sky-dim:   rgba(96,165,250,.1);
       --lilac:     #b899f5;
       --lilac-dim: rgba(184,153,245,.1);
-
-      /* Text */
+      /* State override accent — electric teal */
+      --teal:      #00d4c8;
+      --teal-dim:  rgba(0,212,200,.08);
+      --teal-glow: rgba(0,212,200,.25);
+      --teal-line: rgba(0,212,200,.2);
       --tx:    #ede9e4;
       --tx2:   rgba(237,233,228,.5);
       --tx3:   rgba(237,233,228,.25);
       --tx4:   rgba(237,233,228,.1);
-
-      /* Borders */
       --b1:   rgba(255,255,255,.055);
       --b2:   rgba(255,255,255,.1);
       --b3:   rgba(255,255,255,.16);
-
       --r:    11px;
       --rs:   7px;
     }
@@ -57,13 +52,11 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      /* Warm radial atmosphere */
       background-image:
         radial-gradient(ellipse 100% 45% at 50% -8%, rgba(240,165,0,.07) 0%, transparent 60%),
         radial-gradient(ellipse 55% 65% at 95% 95%, rgba(45,212,160,.04) 0%, transparent 55%);
     }
 
-    /* Fine dot-grid overlay for texture */
     body::after {
       content: '';
       position: fixed;
@@ -75,911 +68,429 @@
       mask-image: radial-gradient(ellipse 100% 100% at 50% 0%, black 30%, transparent 80%);
     }
 
-    /* ═══════════════════════════════════════
-       TOPBAR
-    ═══════════════════════════════════════ */
+    /* ── TOPBAR ── */
     .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 300;
+      position: sticky; top: 0; z-index: 300;
       height: 58px;
       background: rgba(12,11,10,.88);
       backdrop-filter: blur(28px) saturate(1.8);
       border-bottom: 1px solid var(--b2);
       padding: 0 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
+      display: flex; align-items: center; gap: 1rem;
     }
-
-    /* The "live ticker" amber line */
     .topbar::after {
       content: '';
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg,
-        transparent 0%,
-        var(--saf-mid) 25%,
-        var(--saf) 50%,
-        var(--saf-mid) 75%,
-        transparent 100%
-      );
+      position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--saf-mid), var(--saf), var(--saf-mid), transparent);
       animation: tickerSweep 4s ease-in-out infinite;
     }
-    @keyframes tickerSweep {
-      0%   { opacity: .3; }
-      50%  { opacity: .9; }
-      100% { opacity: .3; }
-    }
+    @keyframes tickerSweep { 0%,100%{opacity:.3} 50%{opacity:.9} }
 
     .logo-mark {
       width: 32px; height: 32px;
-      border: 1.5px solid var(--saf);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      flex-shrink: 0;
+      border: 1.5px solid var(--saf); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; font-size: 15px;
       box-shadow: 0 0 18px var(--saf-glow), inset 0 0 10px rgba(240,165,0,.06);
-      position: relative;
     }
-
-    .topbar-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.05rem;
-      font-weight: 600;
-      letter-spacing: -.3px;
-      color: var(--tx);
-    }
-
-    .topbar-sep {
-      width: 1px;
-      height: 16px;
-      background: var(--b3);
-    }
-
-    .topbar-sub {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .62rem;
-      color: var(--tx2);
-      letter-spacing: .02em;
-    }
-
-    .topbar-right { margin-left: auto; display: flex; align-items: center; gap: .6rem; }
-
+    .topbar-title { font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:600; }
+    .topbar-sep   { width:1px; height:16px; background:var(--b3); }
+    .topbar-sub   { font-family:'IBM Plex Mono',monospace; font-size:.62rem; color:var(--tx2); }
+    .topbar-right { margin-left:auto; display:flex; align-items:center; gap:.6rem; }
     .version-pill {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .6rem;
-      color: var(--saf);
-      background: var(--saf-dim);
-      border: 1px solid rgba(240,165,0,.22);
-      border-radius: 999px;
-      padding: .18rem .65rem;
-      letter-spacing: .04em;
+      font-family:'IBM Plex Mono',monospace; font-size:.6rem; color:var(--saf);
+      background:var(--saf-dim); border:1px solid rgba(240,165,0,.22);
+      border-radius:999px; padding:.18rem .65rem;
     }
-
-    /* Live dot indicator */
     .live-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--em);
-      box-shadow: 0 0 8px var(--em);
-      animation: livePulse 2s ease-in-out infinite;
+      width:7px; height:7px; border-radius:50%; background:var(--em);
+      box-shadow:0 0 8px var(--em); animation:livePulse 2s ease-in-out infinite;
     }
-    @keyframes livePulse {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: .35; }
-    }
+    @keyframes livePulse { 0%,100%{opacity:1} 50%{opacity:.35} }
 
-    /* ═══════════════════════════════════════
-       MAIN / PAGE
-    ═══════════════════════════════════════ */
+    /* ── MAIN ── */
     .main {
-      flex: 1;
-      position: relative;
-      z-index: 1;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
+      flex:1; position:relative; z-index:1;
+      display:flex; align-items:flex-start; justify-content:center;
       padding: 2.2rem 1.5rem 5rem;
     }
+    .page { width:100%; max-width:1220px; display:flex; flex-direction:column; gap:1.3rem; }
 
-    .page {
-      width: 100%;
-      max-width: 1220px;
-      display: flex;
-      flex-direction: column;
-      gap: 1.3rem;
-    }
-
-    /* ═══════════════════════════════════════
-       CARD
-    ═══════════════════════════════════════ */
+    /* ── CARD ── */
     .card {
-      background: var(--ink2);
-      border: 1px solid var(--b1);
-      border-radius: var(--r);
-      overflow: hidden;
-      position: relative;
-      transition: border-color .3s, box-shadow .3s;
-      animation: cardSlide .4s ease both;
+      background:var(--ink2); border:1px solid var(--b1); border-radius:var(--r);
+      overflow:hidden; position:relative; transition:border-color .3s, box-shadow .3s;
+      animation:cardSlide .4s ease both;
     }
-    .card:nth-child(1) { animation-delay: .04s; }
-    .card:nth-child(2) { animation-delay: .1s; }
-    .card:nth-child(3) { animation-delay: .16s; }
-    .card:nth-child(4) { animation-delay: .22s; }
-    @keyframes cardSlide {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .card:hover {
-      border-color: var(--b2);
-      box-shadow: 0 6px 40px rgba(0,0,0,.4), 0 1px 0 rgba(240,165,0,.04) inset;
-    }
-
-    /* Top strip per card — amber hairline */
+    .card:nth-child(1){animation-delay:.04s} .card:nth-child(2){animation-delay:.1s}
+    .card:nth-child(3){animation-delay:.16s} .card:nth-child(4){animation-delay:.22s}
+    .card:nth-child(5){animation-delay:.28s}
+    @keyframes cardSlide { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .card:hover { border-color:var(--b2); box-shadow:0 6px 40px rgba(0,0,0,.4); }
     .card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--saf-mid), transparent);
-      opacity: 0;
-      transition: opacity .35s;
+      content:''; position:absolute; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg,transparent,var(--saf-mid),transparent);
+      opacity:0; transition:opacity .35s;
     }
-    .card:hover::before { opacity: 1; }
+    .card:hover::before { opacity:1; }
+
+    /* State override card gets teal accent */
+    .card.state-card::before {
+      background:linear-gradient(90deg,transparent,var(--teal-line),var(--teal),var(--teal-line),transparent);
+    }
+    .card.state-card:hover { border-color: rgba(0,212,200,.2); }
 
     .card-head {
-      padding: .85rem 1.4rem;
-      border-bottom: 1px solid var(--b1);
-      display: flex;
-      align-items: center;
-      gap: .75rem;
-      flex-wrap: wrap;
-      background: linear-gradient(to right, rgba(255,255,255,.018), transparent);
+      padding:.85rem 1.4rem; border-bottom:1px solid var(--b1);
+      display:flex; align-items:center; gap:.75rem; flex-wrap:wrap;
+      background:linear-gradient(to right,rgba(255,255,255,.018),transparent);
     }
-
     .step-badge {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .58rem;
-      font-weight: 500;
-      color: var(--ink);
-      background: var(--saf);
-      min-width: 22px; height: 22px;
-      border-radius: 5px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      box-shadow: 0 2px 12px var(--saf-glow);
-      letter-spacing: .04em;
+      font-family:'IBM Plex Mono',monospace; font-size:.58rem; font-weight:500;
+      color:var(--ink); background:var(--saf); min-width:22px; height:22px;
+      border-radius:5px; display:flex; align-items:center; justify-content:center;
+      box-shadow:0 2px 12px var(--saf-glow);
     }
-    .step-badge.sky    { background: var(--sky);   box-shadow: 0 2px 10px rgba(96,165,250,.3); }
-    .step-badge.lilac  { background: var(--lilac); box-shadow: 0 2px 10px rgba(184,153,245,.3); }
-    .step-badge.em     { background: var(--em);    box-shadow: 0 2px 10px rgba(45,212,160,.3); }
+    .step-badge.sky   { background:var(--sky);   box-shadow:0 2px 10px rgba(96,165,250,.3); }
+    .step-badge.lilac { background:var(--lilac); box-shadow:0 2px 10px rgba(184,153,245,.3); }
+    .step-badge.em    { background:var(--em);    box-shadow:0 2px 10px rgba(45,212,160,.3); }
+    .step-badge.teal  { background:var(--teal);  box-shadow:0 2px 10px var(--teal-glow); color:#0c1412; }
 
-    .card-head h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: .96rem;
-      font-weight: 600;
-      letter-spacing: -.2px;
-    }
+    .card-head h2 { font-family:'Playfair Display',serif; font-size:.96rem; font-weight:600; }
+    .card-head .sub { font-family:'IBM Plex Mono',monospace; font-size:.6rem; color:var(--tx2); margin-left:auto; }
 
-    .card-head .sub {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .6rem;
-      color: var(--tx2);
-      margin-left: auto;
-    }
+    .card-body { padding:1.35rem; display:flex; flex-direction:column; gap:.9rem; }
 
-    .card-body {
-      padding: 1.35rem;
-      display: flex;
-      flex-direction: column;
-      gap: .9rem;
-    }
-
-    /* ═══════════════════════════════════════
-       LABELS
-    ═══════════════════════════════════════ */
+    /* ── LABELS ── */
     .lbl {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .58rem;
-      color: var(--tx2);
-      text-transform: uppercase;
-      letter-spacing: .14em;
-      margin-bottom: .32rem;
-      display: flex;
-      align-items: center;
-      gap: .4rem;
+      font-family:'IBM Plex Mono',monospace; font-size:.58rem; color:var(--tx2);
+      text-transform:uppercase; letter-spacing:.14em; margin-bottom:.32rem;
+      display:flex; align-items:center; gap:.4rem;
     }
-    .lbl .req { color: var(--rose); font-size: .7rem; }
-    .lbl .opt {
-      color: var(--tx3);
-      font-size: .56rem;
-      background: var(--ink3);
-      border: 1px solid var(--b1);
-      border-radius: 3px;
-      padding: .03rem .3rem;
-    }
+    .lbl .req { color:var(--rose); font-size:.7rem; }
+    .lbl .opt { color:var(--tx3); font-size:.56rem; background:var(--ink3); border:1px solid var(--b1); border-radius:3px; padding:.03rem .3rem; }
 
-    /* ═══════════════════════════════════════
-       DROP ZONE
-    ═══════════════════════════════════════ */
+    /* ── DROP ZONE ── */
     .drop-zone {
-      border: 1px dashed rgba(255,255,255,.09);
-      border-radius: var(--r);
-      padding: 2rem 1rem;
-      text-align: center;
-      cursor: pointer;
-      transition: all .22s;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 128px;
-      background: var(--ink);
-      position: relative;
-      overflow: hidden;
+      border:1px dashed rgba(255,255,255,.09); border-radius:var(--r);
+      padding:2rem 1rem; text-align:center; cursor:pointer;
+      transition:all .22s; display:flex; flex-direction:column;
+      align-items:center; justify-content:center; min-height:128px;
+      background:var(--ink); position:relative; overflow:hidden;
     }
-    /* Corner tick marks */
-    .drop-zone::before {
-      content: '';
-      position: absolute;
-      inset: 6px;
-      border: 1px solid transparent;
-      border-radius: calc(var(--r) - 4px);
-      border-image: none;
-      background: none;
-      pointer-events: none;
-      transition: border-color .22s;
-    }
-
     .drop-zone:hover, .drop-zone.over {
-      border-color: var(--saf);
-      background: var(--saf-dim);
-      box-shadow: inset 0 0 40px rgba(240,165,0,.04), 0 0 0 1px var(--saf-line);
-      transform: translateY(-1px);
+      border-color:var(--saf); background:var(--saf-dim);
+      box-shadow:inset 0 0 40px rgba(240,165,0,.04), 0 0 0 1px var(--saf-line);
+      transform:translateY(-1px);
     }
-    .drop-zone:hover::before, .drop-zone.over::before {
-      border-color: rgba(240,165,0,.08);
-    }
-    .drop-zone.filled {
-      border-color: rgba(45,212,160,.38);
-      border-style: solid;
-      background: var(--em-dim);
-    }
+    .drop-zone.filled { border-color:rgba(45,212,160,.38); border-style:solid; background:var(--em-dim); }
+    .drop-icon { font-size:26px; margin-bottom:.55rem; }
+    .drop-title { font-family:'Playfair Display',serif; font-size:.88rem; font-weight:600; margin-bottom:.2rem; }
+    .drop-sub { font-size:.7rem; color:var(--tx2); }
+    .drop-fname { font-family:'IBM Plex Mono',monospace; font-size:.68rem; color:var(--em); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:90%; margin-top:.4rem; }
+    input[type="file"] { display:none; }
 
-    .drop-icon  { font-size: 26px; margin-bottom: .55rem; }
-    .drop-title {
-      font-family: 'Playfair Display', serif;
-      font-size: .88rem;
-      font-weight: 600;
-      margin-bottom: .2rem;
+    /* ── INPUTS ── */
+    input[type="number"], input[type="text"] {
+      background:var(--ink3); border:1px solid var(--b2); border-radius:var(--rs);
+      color:var(--tx); font-family:'IBM Plex Mono',monospace; font-size:.78rem;
+      padding:.5rem .85rem; outline:none; width:100%;
+      transition:border-color .18s, box-shadow .18s, background .18s;
     }
-    .drop-sub { font-size: .7rem; color: var(--tx2); }
-    .drop-fname {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .68rem;
-      color: var(--em);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 90%;
-      margin-top: .4rem;
-    }
-    input[type="file"] { display: none; }
+    input:focus { border-color:var(--saf); background:var(--ink4); box-shadow:0 0 0 3px var(--saf-dim); }
 
-    /* ═══════════════════════════════════════
-       INPUTS
-    ═══════════════════════════════════════ */
-    input[type="number"],
-    input[type="text"] {
-      background: var(--ink3);
-      border: 1px solid var(--b2);
-      border-radius: var(--rs);
-      color: var(--tx);
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .78rem;
-      padding: .5rem .85rem;
-      outline: none;
-      width: 100%;
-      transition: border-color .18s, box-shadow .18s, background .18s;
-    }
-    input:focus {
-      border-color: var(--saf);
-      background: var(--ink4);
-      box-shadow: 0 0 0 3px var(--saf-dim);
-    }
-
-    /* ═══════════════════════════════════════
-       PROCESS BUTTON
-    ═══════════════════════════════════════ */
+    /* ── PROCESS BUTTON ── */
     .proc-btn {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: .65rem;
-      padding: .95rem 2rem;
-      border: none;
-      border-radius: var(--r);
-      background: var(--saf);
-      color: var(--ink);
-      font-family: 'DM Sans', sans-serif;
-      font-size: .95rem;
-      font-weight: 600;
-      letter-spacing: .01em;
-      cursor: pointer;
-      transition: opacity .2s, transform .15s, box-shadow .2s;
-      box-shadow: 0 4px 28px var(--saf-glow), 0 1px 2px rgba(0,0,0,.5);
+      width:100%; display:flex; align-items:center; justify-content:center; gap:.65rem;
+      padding:.95rem 2rem; border:none; border-radius:var(--r);
+      background:var(--saf); color:var(--ink);
+      font-family:'DM Sans',sans-serif; font-size:.95rem; font-weight:600;
+      cursor:pointer; transition:opacity .2s, transform .15s, box-shadow .2s;
+      box-shadow:0 4px 28px var(--saf-glow), 0 1px 2px rgba(0,0,0,.5);
     }
-    .proc-btn:hover:not(:disabled) {
-      opacity: .9;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 36px var(--saf-glow);
-    }
-    .proc-btn:active:not(:disabled) { transform: none; }
-    .proc-btn:disabled { opacity: .25; cursor: not-allowed; transform: none; }
+    .proc-btn:hover:not(:disabled) { opacity:.9; transform:translateY(-2px); box-shadow:0 8px 36px var(--saf-glow); }
+    .proc-btn:disabled { opacity:.25; cursor:not-allowed; transform:none; }
+    .spin { display:inline-block; width:14px; height:14px; border:2px solid rgba(12,11,10,.2); border-top-color:rgba(12,11,10,.8); border-radius:50%; animation:_spin .65s linear infinite; }
+    @keyframes _spin { to{transform:rotate(360deg)} }
 
-    .spin {
-      display: inline-block;
-      width: 14px; height: 14px;
-      border: 2px solid rgba(12,11,10,.2);
-      border-top-color: rgba(12,11,10,.8);
-      border-radius: 50%;
-      animation: _spin .65s linear infinite;
-    }
-    @keyframes _spin { to { transform: rotate(360deg); } }
-
-    /* ═══════════════════════════════════════
-       ERR / SUCCESS
-    ═══════════════════════════════════════ */
+    /* ── ERR/SUC ── */
     .err-box {
-      background: var(--rose-dim);
-      border: 1px solid rgba(242,109,109,.2);
-      border-radius: var(--rs);
-      padding: .72rem 1rem;
-      font-size: .78rem;
-      color: var(--rose);
-      display: none;
-      align-items: flex-start;
-      gap: .55rem;
+      background:var(--rose-dim); border:1px solid rgba(242,109,109,.2); border-radius:var(--rs);
+      padding:.72rem 1rem; font-size:.78rem; color:var(--rose); display:none; align-items:flex-start; gap:.55rem;
     }
-    .err-box.show { display: flex; }
-
+    .err-box.show { display:flex; }
     .suc-box {
-      background: var(--em-dim);
-      border: 1px solid rgba(45,212,160,.18);
-      border-radius: var(--rs);
-      padding: .72rem 1rem;
-      font-size: .78rem;
-      color: var(--em);
-      display: none;
-      align-items: center;
-      gap: .65rem;
-      flex-wrap: wrap;
+      background:var(--em-dim); border:1px solid rgba(45,212,160,.18); border-radius:var(--rs);
+      padding:.72rem 1rem; font-size:.78rem; color:var(--em); display:none; align-items:center; gap:.65rem; flex-wrap:wrap;
     }
-    .suc-box.show { display: flex; }
+    .suc-box.show { display:flex; }
 
-    /* ═══════════════════════════════════════
-       PROGRESS
-    ═══════════════════════════════════════ */
-    .prog-wrap { display: none; }
-    .prog-wrap.show { display: block; }
-    .prog-track {
-      height: 3px;
-      background: var(--ink3);
-      border-radius: 999px;
-      overflow: hidden;
-      margin-bottom: .5rem;
-    }
-    .prog-fill {
-      height: 100%;
-      border-radius: 999px;
-      background: linear-gradient(90deg, var(--saf), #ffd56b);
-      width: 0%;
-      transition: width .4s ease;
-      box-shadow: 0 0 10px var(--saf-glow);
-    }
-    .prog-text {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .65rem;
-      color: var(--tx2);
-    }
+    /* ── PROGRESS ── */
+    .prog-wrap { display:none; }
+    .prog-wrap.show { display:block; }
+    .prog-track { height:3px; background:var(--ink3); border-radius:999px; overflow:hidden; margin-bottom:.5rem; }
+    .prog-fill { height:100%; border-radius:999px; background:linear-gradient(90deg,var(--saf),#ffd56b); width:0%; transition:width .4s ease; box-shadow:0 0 10px var(--saf-glow); }
+    .prog-text { font-family:'IBM Plex Mono',monospace; font-size:.65rem; color:var(--tx2); }
 
-    /* ═══════════════════════════════════════
-       STATS GRID
-    ═══════════════════════════════════════ */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: .75rem;
-    }
-    @media(max-width: 580px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
-
+    /* ── STATS ── */
+    .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:.75rem; }
+    @media(max-width:580px){ .stats-grid{grid-template-columns:1fr 1fr;} }
     .stat-tile {
-      background: var(--ink3);
-      border: 1px solid var(--b1);
-      border-radius: var(--r);
-      padding: 1rem 1.1rem;
-      display: flex;
-      flex-direction: column;
-      gap: .3rem;
-      transition: border-color .2s, transform .18s;
-      cursor: default;
+      background:var(--ink3); border:1px solid var(--b1); border-radius:var(--r);
+      padding:1rem 1.1rem; display:flex; flex-direction:column; gap:.3rem;
+      transition:border-color .2s, transform .18s; cursor:default;
     }
-    .stat-tile:hover { border-color: var(--saf-line); transform: translateY(-2px); }
+    .stat-tile:hover { border-color:var(--saf-line); transform:translateY(-2px); }
+    .stat-val { font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; line-height:1; color:var(--saf); }
+    .stat-val.em   { color:var(--em); }
+    .stat-val.teal { color:var(--teal); }
+    .stat-lbl { font-family:'IBM Plex Mono',monospace; font-size:.58rem; color:var(--tx2); text-transform:uppercase; letter-spacing:.08em; }
 
-    .stat-val {
-      font-family: 'Playfair Display', serif;
-      font-size: 2rem;
-      font-weight: 700;
-      line-height: 1;
-      color: var(--saf);
-    }
-    .stat-val.em   { color: var(--em); }
-    .stat-val.rose { color: var(--rose); }
-
-    .stat-lbl {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .58rem;
-      color: var(--tx2);
-      text-transform: uppercase;
-      letter-spacing: .08em;
-    }
-
-    /* ═══════════════════════════════════════
-       DOWNLOAD BUTTON
-    ═══════════════════════════════════════ */
+    /* ── DOWNLOAD BUTTON ── */
     .dl-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      border: 1px solid var(--saf);
-      color: var(--saf);
-      background: transparent;
-      padding: .52rem 1.25rem;
-      border-radius: var(--rs);
-      font-family: 'DM Sans', sans-serif;
-      font-size: .8rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background .18s, box-shadow .18s, transform .15s;
+      display:inline-flex; align-items:center; gap:.5rem;
+      border:1px solid var(--saf); color:var(--saf); background:transparent;
+      padding:.52rem 1.25rem; border-radius:var(--rs);
+      font-family:'DM Sans',sans-serif; font-size:.8rem; font-weight:600;
+      cursor:pointer; text-decoration:none;
+      transition:background .18s, box-shadow .18s, transform .15s;
     }
-    .dl-btn:hover {
-      background: var(--saf-dim);
-      box-shadow: 0 0 20px var(--saf-glow);
-      transform: translateY(-1px);
-    }
+    .dl-btn:hover { background:var(--saf-dim); box-shadow:0 0 20px var(--saf-glow); transform:translateY(-1px); }
 
-    /* ═══════════════════════════════════════
-       RULES TABLE EDITOR
-    ═══════════════════════════════════════ */
-  .rte-layout {
-  display: grid;
-  grid-template-columns: minmax(0,1fr) 360px;
-  gap: 1.2rem;
-}
-    @media(max-width: 960px) { .rte-layout { grid-template-columns: 1fr; } }
+    /* ── RULES TABLE EDITOR ── */
+    .rte-layout {
+      display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:1.2rem;
+    }
+    @media(max-width:960px){ .rte-layout{grid-template-columns:1fr;} }
+    .rte-table-wrap { display:flex; flex-direction:column; gap:.7rem; min-width:0; }
+    .rte-toolbar { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
+    .rte-count { font-family:'IBM Plex Mono',monospace; font-size:.65rem; color:var(--tx2); margin-right:auto; }
+    .rte-count span { color:var(--saf); font-weight:500; }
+    .tbl-scroll { overflow-x:auto; border:1px solid var(--b2); border-radius:var(--r); background:var(--ink); }
+    .rte-table { width:100%; border-collapse:collapse; min-width:740px; }
+    .rte-table thead tr { background:var(--ink3); }
+    .rte-table th { padding:.6rem .8rem; font-family:'IBM Plex Mono',monospace; font-size:.56rem; font-weight:400; color:var(--tx2); text-transform:uppercase; letter-spacing:.14em; text-align:left; border-bottom:1px solid var(--b2); white-space:nowrap; }
+    .rte-table th:last-child { width:38px; text-align:center; }
+    .rte-table tbody tr { border-bottom:1px solid var(--b1); transition:background .1s; animation:rteIn .22s ease both; }
+    .rte-table tbody tr:last-child { border-bottom:none; }
+    .rte-table tbody tr:hover { background:rgba(240,165,0,.025); }
+    @keyframes rteIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
+    .rte-table td { padding:.4rem .7rem; vertical-align:middle; font-size:.72rem; }
+    .rte-row-num { font-family:'IBM Plex Mono',monospace; font-size:.56rem; color:var(--tx3); text-align:center; }
 
-    .rte-table-wrap { display: flex; flex-direction: column; gap: .7rem;  min-width: 0; }
+    .lob-badge { display:inline-flex; align-items:center; padding:.2rem .56rem; border-radius:5px; font-family:'IBM Plex Mono',monospace; font-size:.63rem; font-weight:500; white-space:nowrap; }
+    .lob-TW   { background:var(--sky-dim);  color:var(--sky);   border:1px solid rgba(96,165,250,.22); }
+    .lob-PC   { background:var(--saf-dim);  color:var(--saf);   border:1px solid rgba(240,165,0,.22); }
+    .lob-CV   { background:var(--em-dim);   color:var(--em);    border:1px solid rgba(45,212,160,.2); }
+    .lob-BUS  { background:var(--lilac-dim);color:var(--lilac); border:1px solid rgba(184,153,245,.2); }
+    .lob-TAXI { background:rgba(252,165,80,.08);color:#fc8c30;  border:1px solid rgba(252,140,48,.2); }
+    .lob-MISD { background:rgba(237,233,228,.04);color:var(--tx2);border:1px solid var(--b2); }
 
-    .rte-toolbar { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
-    .rte-count {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .65rem;
-      color: var(--tx2);
-      margin-right: auto;
-    }
-    .rte-count span { color: var(--saf); font-weight: 500; }
+    .po-chip { display:inline-flex; align-items:center; padding:.19rem .54rem; border-radius:5px; font-family:'IBM Plex Mono',monospace; font-size:.65rem; white-space:nowrap; }
+    .po-neg   { background:var(--rose-dim); color:#f5a0a0; border:1px solid rgba(242,109,109,.16); }
+    .po-pct   { background:var(--saf-dim);  color:var(--saf); border:1px solid rgba(240,165,0,.2); }
+    .po-fixed { background:var(--lilac-dim);color:var(--lilac); border:1px solid rgba(184,153,245,.18); }
+    .po-other { background:var(--ink3);     color:var(--tx2); border:1px solid var(--b2); }
 
-    .tbl-scroll {
-      overflow-x: auto;
-      border: 1px solid var(--b2);
-      border-radius: var(--r);
-      background: var(--ink);
-    }
-    .rte-table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 740px;
-    }
-    .rte-table thead tr {
-      background: var(--ink3);
-    }
-    .rte-table th {
-      padding: .6rem .8rem;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .56rem;
-      font-weight: 400;
-      color: var(--tx2);
-      text-transform: uppercase;
-      letter-spacing: .14em;
-      text-align: left;
-      border-bottom: 1px solid var(--b2);
-      white-space: nowrap;
-    }
-    .rte-table th:last-child { width: 38px; text-align: center; }
+    .rem-badge { display:inline-flex; align-items:center; padding:.16rem .5rem; border-radius:5px; font-family:'IBM Plex Mono',monospace; font-size:.61rem; background:var(--ink3); color:var(--tx2); border:1px solid var(--b2); white-space:nowrap; }
+    .rem-badge.nil { color:var(--sky); background:var(--sky-dim); border-color:rgba(96,165,250,.18); }
 
-    .rte-table tbody tr {
-      border-bottom: 1px solid var(--b1);
-      transition: background .1s;
-      animation: rteIn .22s ease both;
-    }
-    .rte-table tbody tr:last-child { border-bottom: none; }
-    .rte-table tbody tr:hover { background: rgba(240,165,0,.025); }
-    @keyframes rteIn {
-      from { opacity: 0; transform: translateX(-8px); }
-      to   { opacity: 1; transform: translateX(0); }
-    }
+    .ins-cell { font-family:'IBM Plex Mono',monospace; font-size:.67rem; }
+    .ins-all  { color:var(--em); }
+    .ins-rest { color:var(--saf); }
 
-    .rte-table td { padding: .4rem .7rem; vertical-align: middle; font-size: .72rem; }
-    .rte-row-num {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .56rem;
-      color: var(--tx3);
-      text-align: center;
-    }
+    .tbl-rm-btn { width:24px; height:24px; border-radius:5px; border:none; background:transparent; cursor:pointer; color:var(--tx3); display:flex; align-items:center; justify-content:center; margin:0 auto; font-size:.82rem; transition:all .12s; }
+    .tbl-rm-btn:hover { background:var(--rose-dim); color:var(--rose); }
 
-    /* LOB badges */
-    .lob-badge {
-      display: inline-flex;
-      align-items: center;
-      padding: .2rem .56rem;
-      border-radius: 5px;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .63rem;
-      font-weight: 500;
-      white-space: nowrap;
-    }
-    .lob-TW   { background:var(--sky-dim);   color:var(--sky);   border:1px solid rgba(96,165,250,.22); }
-    .lob-PC   { background:var(--saf-dim);   color:var(--saf);   border:1px solid rgba(240,165,0,.22); }
-    .lob-CV   { background:var(--em-dim);    color:var(--em);    border:1px solid rgba(45,212,160,.2); }
-    .lob-BUS  { background:var(--lilac-dim); color:var(--lilac); border:1px solid rgba(184,153,245,.2); }
-    .lob-TAXI { background:rgba(252,165,80,.08); color:#fc8c30;  border:1px solid rgba(252,140,48,.2); }
-    .lob-MISD { background:rgba(237,233,228,.04); color:var(--tx2); border:1px solid var(--b2); }
+    .rte-empty { padding:2.8rem; text-align:center; }
+    .rte-empty .ei { font-size:2.2rem; opacity:.12; margin-bottom:.5rem; }
+    .rte-empty .et { font-family:'IBM Plex Mono',monospace; font-size:.7rem; color:var(--tx3); }
 
-    /* PO chips */
-    .po-chip {
-      display: inline-flex;
-      align-items: center;
-      padding: .19rem .54rem;
-      border-radius: 5px;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .65rem;
-      white-space: nowrap;
-    }
-    .po-neg   { background:var(--rose-dim);  color:#f5a0a0; border:1px solid rgba(242,109,109,.16); }
-    .po-pct   { background:var(--saf-dim);   color:var(--saf); border:1px solid rgba(240,165,0,.2); }
-    .po-fixed { background:var(--lilac-dim); color:var(--lilac); border:1px solid rgba(184,153,245,.18); }
-    .po-other { background:var(--ink3);      color:var(--tx2); border:1px solid var(--b2); }
-
-    /* Range badges */
-    .rem-badge {
-      display: inline-flex;
-      align-items: center;
-      padding: .16rem .5rem;
-      border-radius: 5px;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .61rem;
-      background: var(--ink3);
-      color: var(--tx2);
-      border: 1px solid var(--b2);
-      white-space: nowrap;
-    }
-    .rem-badge.nil { color: var(--sky); background: var(--sky-dim); border-color: rgba(96,165,250,.18); }
-
-    .ins-cell { font-family: 'IBM Plex Mono', monospace; font-size: .67rem; }
-    .ins-all  { color: var(--em); }
-    .ins-rest { color: var(--saf); }
-
-    .tbl-rm-btn {
-      width: 24px; height: 24px;
-      border-radius: 5px; border: none; background: transparent;
-      cursor: pointer; color: var(--tx3);
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto; font-size: .82rem;
-      transition: all .12s;
-    }
-    .tbl-rm-btn:hover { background: var(--rose-dim); color: var(--rose); }
-
-    .rte-empty { padding: 2.8rem; text-align: center; }
-    .rte-empty .ei { font-size: 2.2rem; opacity: .12; margin-bottom: .5rem; }
-    .rte-empty .et {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .7rem;
-      color: var(--tx3);
-    }
-
-    /* ─── FORM PANEL ─── */
     .rte-form {
-      display: flex;
-      flex-direction: column;
-      gap: .78rem;
-      background: var(--ink3);
-      border: 1px solid var(--b2);
-      border-radius: var(--r);
-      padding: 1.15rem;
-      position: relative;
-      overflow: hidden;
+      display:flex; flex-direction:column; gap:.78rem;
+      background:var(--ink3); border:1px solid var(--b2); border-radius:var(--r);
+      padding:1.15rem; position:relative; overflow:hidden;
     }
-    /* Amber corner glow */
-    .rte-form::before {
-      content: '';
-      position: absolute;
-      top: 0; right: 0;
-      width: 80px; height: 80px;
-      background: radial-gradient(circle at 100% 0%, var(--saf-dim), transparent 70%);
-      pointer-events: none;
-    }
-
-    .rte-form-title {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .58rem;
-      font-weight: 400;
-      color: var(--tx2);
-      text-transform: uppercase;
-      letter-spacing: .16em;
-      padding-bottom: .65rem;
-      border-bottom: 1px solid var(--b1);
-    }
-
-    .rte-flbl {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .56rem;
-      color: var(--tx2);
-      text-transform: uppercase;
-      letter-spacing: .11em;
-      margin-bottom: .28rem;
-    }
+    .rte-form::before { content:''; position:absolute; top:0; right:0; width:80px; height:80px; background:radial-gradient(circle at 100% 0%,var(--saf-dim),transparent 70%); pointer-events:none; }
+    .rte-form-title { font-family:'IBM Plex Mono',monospace; font-size:.58rem; font-weight:400; color:var(--tx2); text-transform:uppercase; letter-spacing:.16em; padding-bottom:.65rem; border-bottom:1px solid var(--b1); }
+    .rte-flbl { font-family:'IBM Plex Mono',monospace; font-size:.56rem; color:var(--tx2); text-transform:uppercase; letter-spacing:.11em; margin-bottom:.28rem; }
 
     .rte-select, .rte-input {
-      background: var(--ink2);
-      border: 1px solid var(--b2);
-      border-radius: var(--rs);
-      color: var(--tx);
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .72rem;
-      padding: .44rem .7rem;
-      outline: none;
-      width: 100%;
-      transition: border-color .18s, box-shadow .18s, background .18s;
+      background:var(--ink2); border:1px solid var(--b2); border-radius:var(--rs);
+      color:var(--tx); font-family:'IBM Plex Mono',monospace; font-size:.72rem;
+      padding:.44rem .7rem; outline:none; width:100%;
+      transition:border-color .18s, box-shadow .18s, background .18s;
     }
     .rte-select {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5L9 0z' fill='rgba(237,233,228,.25)'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right .65rem center;
-      padding-right: 1.8rem;
-      appearance: none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5L9 0z' fill='rgba(237,233,228,.25)'/%3E%3C/svg%3E");
+      background-repeat:no-repeat; background-position:right .65rem center; padding-right:1.8rem; appearance:none;
     }
-    .rte-select:focus, .rte-input:focus {
-      border-color: var(--saf);
-      background: var(--ink4);
-      box-shadow: 0 0 0 2px var(--saf-dim);
-    }
-    .rte-select option { background: #1a1917; }
+    .rte-select:focus, .rte-input:focus { border-color:var(--saf); background:var(--ink4); box-shadow:0 0 0 2px var(--saf-dim); }
+    .rte-select option { background:#1a1917; }
 
-    /* PO tabs */
-    .po-tabs { display: flex; gap: .28rem; flex-wrap: wrap; }
-    .po-tab {
-      flex: 1; min-width: 56px;
-      padding: .3rem .28rem;
-      border-radius: 5px;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .6rem;
-      border: 1px solid var(--b2);
-      color: var(--tx2);
-      background: var(--ink2);
-      cursor: pointer;
-      text-align: center;
-      transition: all .12s;
-    }
-    .po-tab:hover { border-color: var(--saf); color: var(--saf); background: var(--saf-dim); }
-    .po-tab.on    { background: var(--saf); border-color: var(--saf); color: var(--ink); font-weight: 500; }
+    .po-tabs { display:flex; gap:.28rem; flex-wrap:wrap; }
+    .po-tab { flex:1; min-width:56px; padding:.3rem .28rem; border-radius:5px; font-family:'IBM Plex Mono',monospace; font-size:.6rem; border:1px solid var(--b2); color:var(--tx2); background:var(--ink2); cursor:pointer; text-align:center; transition:all .12s; }
+    .po-tab:hover { border-color:var(--saf); color:var(--saf); background:var(--saf-dim); }
+    .po-tab.on    { background:var(--saf); border-color:var(--saf); color:var(--ink); font-weight:500; }
 
-    /* Range tabs */
-    .rng-tabs { display: flex; gap: .28rem; flex-wrap: wrap; margin-bottom: .38rem; }
-    .rng-tab {
-      flex: 1; min-width: 44px;
-      padding: .27rem .28rem;
-      border-radius: 5px;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .58rem;
-      border: 1px solid var(--b2);
-      color: var(--tx2);
-      background: var(--ink2);
-      cursor: pointer;
-      text-align: center;
-      transition: all .12s;
-    }
-    .rng-tab:hover { border-color: var(--sky); color: var(--sky); background: var(--sky-dim); }
-    .rng-tab.on    { background: var(--sky); border-color: var(--sky); color: var(--ink); font-weight: 500; }
+    .rng-tabs { display:flex; gap:.28rem; flex-wrap:wrap; margin-bottom:.38rem; }
+    .rng-tab { flex:1; min-width:44px; padding:.27rem .28rem; border-radius:5px; font-family:'IBM Plex Mono',monospace; font-size:.58rem; border:1px solid var(--b2); color:var(--tx2); background:var(--ink2); cursor:pointer; text-align:center; transition:all .12s; }
+    .rng-tab:hover { border-color:var(--sky); color:var(--sky); background:var(--sky-dim); }
+    .rng-tab.on    { background:var(--sky); border-color:var(--sky); color:var(--ink); font-weight:500; }
 
-    .rng-inputs { display: flex; align-items: center; gap: .4rem; }
-    .rng-inputs .rte-input { width: 82px; flex-shrink: 0; }
-    .rng-sep {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .65rem;
-      color: var(--tx3);
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
+    .rng-inputs { display:flex; align-items:center; gap:.4rem; }
+    .rng-inputs .rte-input { width:82px; flex-shrink:0; }
+    .rng-sep { font-family:'IBM Plex Mono',monospace; font-size:.65rem; color:var(--tx3); white-space:nowrap; flex-shrink:0; }
 
     .rte-add-btn {
-      width: 100%;
-      padding: .64rem;
-      border-radius: var(--rs);
-      border: none;
-      cursor: pointer;
-      background: var(--saf);
-      color: var(--ink);
-      font-family: 'DM Sans', sans-serif;
-      font-size: .85rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: .4rem;
-      transition: opacity .15s, transform .12s, box-shadow .15s;
-      box-shadow: 0 2px 14px var(--saf-glow);
+      width:100%; padding:.64rem; border-radius:var(--rs); border:none; cursor:pointer;
+      background:var(--saf); color:var(--ink); font-family:'DM Sans',sans-serif; font-size:.85rem; font-weight:600;
+      display:flex; align-items:center; justify-content:center; gap:.4rem;
+      transition:opacity .15s, transform .12s, box-shadow .15s;
+      box-shadow:0 2px 14px var(--saf-glow);
     }
-    .rte-add-btn:hover { opacity: .9; transform: translateY(-1px); box-shadow: 0 5px 20px var(--saf-glow); }
-    .rte-add-btn:disabled { opacity: .26; cursor: not-allowed; transform: none; }
+    .rte-add-btn:hover { opacity:.9; transform:translateY(-1px); box-shadow:0 5px 20px var(--saf-glow); }
+    .rte-add-btn:disabled { opacity:.26; cursor:not-allowed; transform:none; }
 
-    .rte-val-err {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .62rem;
-      color: var(--rose);
-      background: var(--rose-dim);
-      border: 1px solid rgba(242,109,109,.16);
-      border-radius: 5px;
-      padding: .3rem .55rem;
-      display: none;
-    }
-    .rte-val-err.show { display: block; }
+    .rte-val-err { font-family:'IBM Plex Mono',monospace; font-size:.62rem; color:var(--rose); background:var(--rose-dim); border:1px solid rgba(242,109,109,.16); border-radius:5px; padding:.3rem .55rem; display:none; }
+    .rte-val-err.show { display:block; }
 
-    /* Ghost small buttons */
-    .g-btn {
-      padding: .3rem .65rem;
-      border-radius: 5px;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .62rem;
-      border: 1px solid var(--b2);
-      color: var(--tx2);
-      background: transparent;
-      cursor: pointer;
-      transition: all .13s;
-      white-space: nowrap;
-    }
-    .g-btn:hover { border-color: var(--saf); color: var(--saf); background: var(--saf-dim); }
-    .g-btn.danger:hover { border-color: var(--rose); color: var(--rose); background: var(--rose-dim); }
+    .g-btn { padding:.3rem .65rem; border-radius:5px; font-family:'IBM Plex Mono',monospace; font-size:.62rem; border:1px solid var(--b2); color:var(--tx2); background:transparent; cursor:pointer; transition:all .13s; white-space:nowrap; }
+    .g-btn:hover { border-color:var(--saf); color:var(--saf); background:var(--saf-dim); }
+    .g-btn.danger:hover { border-color:var(--rose); color:var(--rose); background:var(--rose-dim); }
 
-    /* JSON bar */
-    .rte-json-bar {
-      display: flex;
-      align-items: center;
-      gap: .55rem;
-      flex-wrap: wrap;
-      padding: .5rem .75rem;
-      background: var(--ink3);
-      border: 1px solid var(--b1);
-      border-radius: var(--rs);
-    }
-    .rte-json-status { font-family: 'IBM Plex Mono', monospace; font-size: .63rem; }
-    .rte-json-status.ok  { color: var(--em); }
-    .rte-json-status.bad { color: var(--rose); }
-    .rte-json-pill {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .59rem;
-      background: var(--ink2);
-      border: 1px solid var(--b2);
-      border-radius: 4px;
-      padding: .14rem .48rem;
-      color: var(--tx2);
-    }
-    .rte-json-pill.hi { color: var(--saf); border-color: rgba(240,165,0,.25); background: var(--saf-dim); }
+    .rte-json-bar { display:flex; align-items:center; gap:.55rem; flex-wrap:wrap; padding:.5rem .75rem; background:var(--ink3); border:1px solid var(--b1); border-radius:var(--rs); }
+    .rte-json-status { font-family:'IBM Plex Mono',monospace; font-size:.63rem; }
+    .rte-json-status.ok  { color:var(--em); }
+    .rte-json-status.bad { color:var(--rose); }
+    .rte-json-pill { font-family:'IBM Plex Mono',monospace; font-size:.59rem; background:var(--ink2); border:1px solid var(--b2); border-radius:4px; padding:.14rem .48rem; color:var(--tx2); }
+    .rte-json-pill.hi { color:var(--saf); border-color:rgba(240,165,0,.25); background:var(--saf-dim); }
 
-    .rte-divider { height: 1px; background: var(--b1); }
-    #rulesJson { display: none; }
+    .rte-divider { height:1px; background:var(--b1); }
+    #rulesJson { display:none; }
 
-    /* ═══════════════════════════════════════
-       ADVANCED SETTINGS
-    ═══════════════════════════════════════ */
-    .adv-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-    }
-    .adv-field {
-      display: flex;
-      flex-direction: column;
-      gap: .4rem;
-      min-width: 170px;
-    }
-    .adv-seg-col {
-      display: flex;
-      flex-direction: column;
-      gap: .45rem;
-      flex: 1;
-      min-width: 200px;
-    }
-    .adv-seg-title {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .57rem;
-      color: var(--tx2);
-      text-transform: uppercase;
-      letter-spacing: .1em;
-      display: flex;
-      align-items: center;
-      gap: .4rem;
-    }
-    .adv-seg-title .opt {
-      color: var(--tx3); font-size: .55rem;
-      background: var(--ink3); border: 1px solid var(--b1);
-      border-radius: 3px; padding: .03rem .3rem;
-    }
-    .adv-seg-chips { display: flex; flex-wrap: wrap; gap: .32rem; }
+    /* ── ADVANCED SETTINGS ── */
+    .adv-row { display:flex; align-items:flex-start; gap:1.5rem; flex-wrap:wrap; }
+    .adv-field { display:flex; flex-direction:column; gap:.4rem; min-width:170px; }
+    .adv-seg-col { display:flex; flex-direction:column; gap:.45rem; flex:1; min-width:200px; }
+    .adv-seg-title { font-family:'IBM Plex Mono',monospace; font-size:.57rem; color:var(--tx2); text-transform:uppercase; letter-spacing:.1em; display:flex; align-items:center; gap:.4rem; }
+    .adv-seg-title .opt { color:var(--tx3); font-size:.55rem; background:var(--ink3); border:1px solid var(--b1); border-radius:3px; padding:.03rem .3rem; }
+    .adv-seg-chips { display:flex; flex-wrap:wrap; gap:.32rem; }
+    .seg-chip { padding:.24rem .66rem; border-radius:999px; border:1px solid var(--b2); background:transparent; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:.61rem; color:var(--tx2); transition:all .13s; user-select:none; }
+    .seg-chip:hover { border-color:var(--lilac); color:var(--lilac); background:var(--lilac-dim); }
+    .seg-chip.on    { background:var(--lilac); border-color:var(--lilac); color:#fff; }
+    .adv-divider { height:1px; background:var(--b1); }
 
-    .seg-chip {
-      padding: .24rem .66rem;
-      border-radius: 999px;
-      border: 1px solid var(--b2);
-      background: transparent;
-      cursor: pointer;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .61rem;
-      color: var(--tx2);
-      transition: all .13s;
-      user-select: none;
-    }
-    .seg-chip:hover { border-color: var(--lilac); color: var(--lilac); background: var(--lilac-dim); }
-    .seg-chip.on    { background: var(--lilac); border-color: var(--lilac); color: #fff; }
+    .rules-hint { background:var(--ink3); border:1px solid var(--b1); border-left:2px solid var(--saf-line); border-radius:0 var(--rs) var(--rs) 0; padding:.8rem 1rem; font-size:.72rem; color:var(--tx2); line-height:1.75; }
+    .rules-hint code { font-family:'IBM Plex Mono',monospace; color:var(--saf); background:var(--saf-dim); padding:.03rem .3rem; border-radius:3px; }
+    .rules-hint strong { color:var(--tx); }
 
-    .adv-divider { height: 1px; background: var(--b1); }
-
-    .rules-hint {
-      background: var(--ink3);
-      border: 1px solid var(--b1);
-      border-left: 2px solid var(--saf-line);
-      border-radius: 0 var(--rs) var(--rs) 0;
-      padding: .8rem 1rem;
-      font-size: .72rem;
-      color: var(--tx2);
-      line-height: 1.75;
+    /* ════════════════════════════════════════
+       STATE OVERRIDE SECTION
+    ════════════════════════════════════════ */
+    .sov-layout {
+      display:grid; grid-template-columns:minmax(0,1fr) 400px; gap:1.2rem;
     }
-    .rules-hint code {
-      font-family: 'IBM Plex Mono', monospace;
-      color: var(--saf);
-      background: var(--saf-dim);
-      padding: .03rem .3rem;
-      border-radius: 3px;
-    }
-    .rules-hint strong { color: var(--tx); }
+    @media(max-width:1024px){ .sov-layout{grid-template-columns:1fr;} }
 
-    /* ═══════════════════════════════════════
-       FOOTER
-    ═══════════════════════════════════════ */
+    /* State Table */
+    .sov-table-wrap { display:flex; flex-direction:column; gap:.7rem; min-width:0; }
+    .sov-tbl-scroll { overflow-x:auto; border:1px solid rgba(0,212,200,.15); border-radius:var(--r); background:var(--ink); }
+    .sov-table { width:100%; border-collapse:collapse; min-width:720px; }
+    .sov-table thead tr { background:rgba(0,212,200,.04); }
+    .sov-table th { padding:.6rem .8rem; font-family:'IBM Plex Mono',monospace; font-size:.56rem; font-weight:400; color:var(--teal); text-transform:uppercase; letter-spacing:.14em; text-align:left; border-bottom:1px solid rgba(0,212,200,.12); white-space:nowrap; }
+    .sov-table th:last-child { width:38px; text-align:center; }
+    .sov-table tbody tr { border-bottom:1px solid var(--b1); transition:background .1s; animation:rteIn .22s ease both; }
+    .sov-table tbody tr:last-child { border-bottom:none; }
+    .sov-table tbody tr:hover { background:rgba(0,212,200,.03); }
+    .sov-table td { padding:.4rem .7rem; vertical-align:middle; font-size:.72rem; }
+
+    /* State badge */
+    .state-badge {
+      display:inline-flex; align-items:center; padding:.18rem .56rem; border-radius:5px;
+      font-family:'IBM Plex Mono',monospace; font-size:.66rem; font-weight:500;
+      background:var(--teal-dim); color:var(--teal); border:1px solid var(--teal-line);
+    }
+
+    /* State Form */
+    .sov-form {
+      display:flex; flex-direction:column; gap:.78rem;
+      background:var(--ink3); border:1px solid rgba(0,212,200,.18); border-radius:var(--r);
+      padding:1.15rem; position:relative; overflow:hidden;
+    }
+    .sov-form::before {
+      content:''; position:absolute; top:0; right:0; width:90px; height:90px;
+      background:radial-gradient(circle at 100% 0%, rgba(0,212,200,.08), transparent 70%);
+      pointer-events:none;
+    }
+    .sov-form-title { font-family:'IBM Plex Mono',monospace; font-size:.58rem; color:var(--teal); text-transform:uppercase; letter-spacing:.16em; padding-bottom:.65rem; border-bottom:1px solid rgba(0,212,200,.1); }
+
+    /* Custom insurer lookup area */
+    .cid-lookup {
+      display:none;
+      flex-direction:column; gap:.42rem;
+      background:var(--ink4); border:1px solid rgba(0,212,200,.12);
+      border-radius:var(--rs); padding:.75rem;
+    }
+    .cid-lookup.show { display:flex; }
+    .cid-lookup-row { display:flex; gap:.5rem; align-items:center; }
+    .cid-result {
+      font-family:'IBM Plex Mono',monospace; font-size:.63rem; padding:.38rem .65rem;
+      border-radius:5px; background:var(--ink3); border:1px solid var(--b2);
+    }
+    .cid-result.found { color:var(--em); border-color:rgba(45,212,160,.2); background:var(--em-dim); }
+    .cid-result.notfound { color:var(--rose); border-color:rgba(242,109,109,.2); background:var(--rose-dim); }
+    .cid-result.idle { color:var(--tx3); }
+
+    /* Apply-to toggle */
+    .apply-tabs { display:flex; gap:.28rem; }
+    .apply-tab { flex:1; padding:.28rem; border-radius:5px; font-family:'IBM Plex Mono',monospace; font-size:.6rem; border:1px solid var(--b2); color:var(--tx2); background:var(--ink2); cursor:pointer; text-align:center; transition:all .12s; }
+    .apply-tab:hover { border-color:var(--teal); color:var(--teal); background:var(--teal-dim); }
+    .apply-tab.on    { background:var(--teal); border-color:var(--teal); color:#0c1412; font-weight:500; }
+
+    /* Teal add button */
+    .sov-add-btn {
+      width:100%; padding:.64rem; border-radius:var(--rs); border:none; cursor:pointer;
+      background:var(--teal); color:#0c1412;
+      font-family:'DM Sans',sans-serif; font-size:.85rem; font-weight:600;
+      display:flex; align-items:center; justify-content:center; gap:.4rem;
+      transition:opacity .15s, transform .12s, box-shadow .15s;
+      box-shadow:0 2px 14px var(--teal-glow);
+    }
+    .sov-add-btn:hover { opacity:.9; transform:translateY(-1px); box-shadow:0 5px 20px var(--teal-glow); }
+    .sov-add-btn:disabled { opacity:.26; cursor:not-allowed; transform:none; }
+
+    .sov-val-err { font-family:'IBM Plex Mono',monospace; font-size:.62rem; color:var(--rose); background:var(--rose-dim); border:1px solid rgba(242,109,109,.16); border-radius:5px; padding:.3rem .55rem; display:none; }
+    .sov-val-err.show { display:block; }
+
+    .sov-json-bar { display:flex; align-items:center; gap:.55rem; flex-wrap:wrap; padding:.5rem .75rem; background:var(--ink3); border:1px solid rgba(0,212,200,.1); border-radius:var(--rs); }
+    .sov-json-status { font-family:'IBM Plex Mono',monospace; font-size:.63rem; }
+    .sov-json-status.ok { color:var(--teal); }
+    .sov-json-status.none { color:var(--tx3); }
+
+    .sov-hint { background:var(--ink3); border:1px solid var(--b1); border-left:2px solid var(--teal-line); border-radius:0 var(--rs) var(--rs) 0; padding:.8rem 1rem; font-size:.72rem; color:var(--tx2); line-height:1.75; }
+    .sov-hint code { font-family:'IBM Plex Mono',monospace; color:var(--teal); background:var(--teal-dim); padding:.03rem .3rem; border-radius:3px; }
+    .sov-hint strong { color:var(--tx); }
+
+    /* State selector grid */
+    .state-grid { display:flex; flex-wrap:wrap; gap:.28rem; }
+    .state-btn {
+      padding:.22rem .55rem; border-radius:5px;
+      font-family:'IBM Plex Mono',monospace; font-size:.62rem;
+      border:1px solid var(--b2); color:var(--tx2); background:var(--ink2);
+      cursor:pointer; transition:all .12s; user-select:none;
+    }
+    .state-btn:hover { border-color:var(--teal); color:var(--teal); background:var(--teal-dim); }
+    .state-btn.selected { background:var(--teal); border-color:var(--teal); color:#0c1412; font-weight:500; }
+
+    /* ── FOOTER ── */
     footer {
-      border-top: 1px solid var(--b1);
-      padding: .9rem 2rem;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: .58rem;
-      color: var(--tx3);
-      display: flex;
-      align-items: center;
-      gap: .8rem;
-      position: relative;
-      z-index: 1;
+      border-top:1px solid var(--b1); padding:.9rem 2rem;
+      font-family:'IBM Plex Mono',monospace; font-size:.58rem; color:var(--tx3);
+      display:flex; align-items:center; gap:.8rem; position:relative; z-index:1;
     }
-    footer .brand { font-family: 'Playfair Display', serif; font-size: .72rem; color: var(--tx2); font-style: italic; }
-    footer .dot   { color: var(--saf); opacity: .4; }
-    footer span:last-child { margin-left: auto; }
+    footer .brand { font-family:'Playfair Display',serif; font-size:.72rem; color:var(--tx2); font-style:italic; }
+    footer .dot   { color:var(--saf); opacity:.4; }
+    footer span:last-child { margin-left:auto; }
   </style>
 </head>
 <body>
@@ -992,7 +503,7 @@
   <span class="topbar-sub">PayinConfig → Calculated Payout</span>
   <div class="topbar-right">
     <div class="live-dot" title="Ready"></div>
-    <span class="version-pill">v2.0</span>
+    <span class="version-pill">v3.0</span>
   </div>
 </header>
 
@@ -1029,7 +540,6 @@
     </div>
     <div class="card-body">
       <div class="rte-layout">
-
         <!-- TABLE -->
         <div class="rte-table-wrap">
           <div class="rte-toolbar">
@@ -1039,17 +549,9 @@
           </div>
           <div class="tbl-scroll">
             <table class="rte-table">
-              <thead>
-                <tr>
-                  <th>#</th><th>LOB</th><th>Segment</th><th>Insurer</th>
-                  <th>PO Formula</th><th>Range</th><th>✕</th>
-                </tr>
-              </thead>
+              <thead><tr><th>#</th><th>LOB</th><th>Segment</th><th>Insurer</th><th>PO Formula</th><th>Range</th><th>✕</th></tr></thead>
               <tbody id="rteBody">
-                <tr><td colspan="7"><div class="rte-empty">
-                  <div class="ei">📭</div>
-                  <div class="et">No rules yet — add using the form →</div>
-                </div></td></tr>
+                <tr><td colspan="7"><div class="rte-empty"><div class="ei">📭</div><div class="et">No rules yet — add using the form →</div></div></td></tr>
               </tbody>
             </table>
           </div>
@@ -1058,7 +560,6 @@
             <span class="rte-json-pill hi"   id="rteJsonLobs"></span>
           </div>
         </div>
-
         <!-- FORM -->
         <div class="rte-form">
           <div class="rte-form-title">Add Rule</div>
@@ -1122,10 +623,156 @@
     </div>
   </div>
 
-  <!-- STEP 3: Advanced Settings -->
+  <!-- STEP 3: STATE OVERRIDES -->
+  <div class="card state-card">
+    <div class="card-head">
+      <span class="step-badge teal">3</span>
+      <h2>State-Wise Payout Overrides</h2>
+      <span class="sub">Override payout by RTO state &amp; company — optional</span>
+    </div>
+    <div class="card-body">
+
+      <div class="sov-layout">
+        <!-- TABLE -->
+        <div class="sov-table-wrap">
+          <div class="rte-toolbar">
+            <span class="rte-count" style="--saf:var(--teal)"><span id="sovCount" style="color:var(--teal)">0</span> overrides</span>
+            <button class="g-btn" onclick="sovClearAll()">🗑 Clear all</button>
+          </div>
+          <div class="sov-tbl-scroll">
+            <table class="sov-table">
+              <thead>
+                <tr><th>#</th><th>State</th><th>Segment</th><th>Insurer</th><th>Apply To</th><th>PO Formula</th><th>Range</th><th>✕</th></tr>
+              </thead>
+              <tbody id="sovBody">
+                <tr><td colspan="8"><div class="rte-empty">
+                  <div class="ei">🗺</div>
+                  <div class="et">No state overrides yet — add below →</div>
+                </div></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="sov-json-bar">
+            <span class="sov-json-status none" id="sovJsonStatus">No state overrides</span>
+          </div>
+
+          <div class="sov-hint">
+            <strong>How it works:</strong> For each row in PayinConfig that has a <code>rto_group_id</code> column, the system will look up the matching state + company combination.<br/>
+            Matched rows get <strong>state_override_applied = TRUE</strong> and are highlighted <span style="background:#E8F4FF;color:#1a6bb5;padding:0 4px;border-radius:3px;font-family:monospace;font-size:.75rem;">blue</span> in the output.<br/>
+            The system looks up <code>rto_group_id</code>s from <code>distinct_rto_output.json</code> using the selected <strong>state + company</strong> combination, then matches those ids against the <code>rto_group_id</code> column in your PayinConfig.
+          </div>
+        </div>
+
+        <!-- FORM -->
+        <div class="sov-form">
+          <div class="sov-form-title">Add State Override</div>
+
+          <!-- State selector -->
+          <div>
+            <div class="rte-flbl">State (RTO Code) *</div>
+            <div class="state-grid" id="stateGrid"></div>
+            <input type="hidden" id="sovState" />
+          </div>
+
+          <div class="rte-divider"></div>
+
+          <!-- Segment -->
+          <div>
+            <div class="rte-flbl">Segment *</div>
+            <select class="rte-select" id="sovSeg">
+              <option value="ALL">ALL SEGMENTS</option>
+              <option value="TW SAOD + COMP">TW SAOD + COMP</option>
+              <option value="TW TP">TW TP</option>
+              <option value="PVT CAR COMP + SAOD">PVT CAR COMP + SAOD</option>
+              <option value="PVT CAR TP">PVT CAR TP</option>
+              <option value="All GVW &amp; PCV 3W, GCV 3W">All GVW &amp; PCV 3W, GCV 3W</option>
+              <option value="Upto 2.5 GVW">Upto 2.5 GVW</option>
+              <option value="SCHOOL BUS">SCHOOL BUS</option>
+              <option value="STAFF BUS">STAFF BUS</option>
+              <option value="TAXI">TAXI</option>
+              <option value="Misd, Tractor">Misd, Tractor</option>
+            </select>
+          </div>
+
+          <!-- Company / Insurer -->
+          <div>
+            <div class="rte-flbl">Company (Insurer) *</div>
+            <select class="rte-select" id="sovCompanySelect" onchange="sovOnCompanyChange()">
+              <option value="">— Select Company —</option>
+              <option value="1">BAJAJ (id: 1)</option>
+              <option value="3">FUTURE (id: 3)</option>
+              <option value="4">Reliance (id: 4)</option>
+              <option value="5">ICICI (id: 5)</option>
+              <option value="8">HDFC (id: 8)</option>
+              <option value="9">TATA (id: 9)</option>
+              <option value="14">CHOLA (id: 14)</option>
+              <option value="18">Liberty (id: 18)</option>
+              <option value="19">Magma (id: 19)</option>
+              <option value="24">ROYAL (id: 24)</option>
+              <option value="25">SBI (id: 25)</option>
+              <option value="26">SHRIRAM (id: 26)</option>
+              <option value="38">SOMPO (id: 38)</option>
+              <option value="41">DIGIT (id: 41)</option>
+              <option value="45">Zuno (id: 45)</option>
+            </select>
+            <!-- Live rto_group_id lookup result -->
+            <div class="cid-lookup show" id="cidLookup" style="margin-top:.45rem;">
+              <div class="cid-result idle" id="cidResult">Select a state &amp; company to resolve rto_group_ids</div>
+            </div>
+          </div>
+
+          <!-- Apply to OD / TP / Both -->
+          <div>
+            <div class="rte-flbl">Apply To</div>
+            <div class="apply-tabs">
+              <button class="apply-tab on" data-at="BOTH" onclick="sovSelApply(this)">OD + TP</button>
+              <button class="apply-tab"    data-at="OD"   onclick="sovSelApply(this)">OD Only</button>
+              <button class="apply-tab"    data-at="TP"   onclick="sovSelApply(this)">TP Only</button>
+            </div>
+          </div>
+
+          <div class="rte-divider"></div>
+
+          <!-- PO Formula -->
+          <div>
+            <div class="rte-flbl">PO Formula *</div>
+            <div class="po-tabs" id="sovPoTabs">
+              <button class="po-tab on" data-pt="pct"     onclick="sovSelPoType(this)">% Payin</button>
+              <button class="po-tab"    data-pt="deduct"  onclick="sovSelPoType(this)">Deduct</button>
+              <button class="po-tab"    data-pt="fixed"   onclick="sovSelPoType(this)">Fixed</button>
+              <button class="po-tab"    data-pt="special" onclick="sovSelPoType(this)">Special</button>
+            </div>
+            <div id="sovPoInputs" style="margin-top:.4rem;"></div>
+          </div>
+
+          <!-- Range -->
+          <div>
+            <div class="rte-flbl">Payin Range</div>
+            <div class="rng-tabs" id="sovRngTabs">
+              <button class="rng-tab on" data-rt="nil"     onclick="sovSelRng(this)">NIL</button>
+              <button class="rng-tab"    data-rt="below"   onclick="sovSelRng(this)">Below</button>
+              <button class="rng-tab"    data-rt="range"   onclick="sovSelRng(this)">Range</button>
+              <button class="rng-tab"    data-rt="above"   onclick="sovSelRng(this)">Above</button>
+            </div>
+            <div class="rng-inputs" id="sovRngInputs" style="display:none;">
+              <input class="rte-input" type="number" id="sovRngLo" placeholder="From%" min="0" max="100" step="0.5"/>
+              <span class="rng-sep" id="sovRngSep">to</span>
+              <input class="rte-input" type="number" id="sovRngHi" placeholder="To%"   min="0" max="100" step="0.5"/>
+            </div>
+          </div>
+
+          <div class="sov-val-err" id="sovValErr">Please fill all required fields.</div>
+          <button class="sov-add-btn" onclick="sovAddOverride()">＋ Add State Override</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- STEP 4: Advanced Settings -->
   <div class="card">
     <div class="card-head">
-      <span class="step-badge sky">3</span>
+      <span class="step-badge sky">4</span>
       <h2>Advanced Settings</h2>
       <span class="sub">Optional — defaults pre-filled</span>
     </div>
@@ -1163,16 +810,16 @@
         </div>
       </div>
       <div class="rules-hint">
-        <strong>Payin ≤ threshold:</strong> Rows where payin_od_rate or payin_tp_rate ≤ this value will have <code>calculated = 0</code>.&nbsp;
-        <strong>IRDA rates:</strong> These exact OD payin values are IRDA-regulated fixed rates — no payout is processed (OD only; TP still uses the formula).
+        <strong>Payin ≤ threshold:</strong> Rows where payin ≤ this value → <code>calculated = 0</code>.&nbsp;
+        <strong>IRDA rates:</strong> These exact OD payin values are IRDA-regulated — no payout processed (OD only).
       </div>
     </div>
   </div>
 
-  <!-- STEP 4: Run -->
+  <!-- STEP 5: Run -->
   <div class="card">
     <div class="card-head">
-      <span class="step-badge em">4</span>
+      <span class="step-badge em">5</span>
       <h2>Run Recalculation</h2>
     </div>
     <div class="card-body">
@@ -1188,12 +835,12 @@
       </div>
       <div id="statsArea" style="display:none">
         <div class="stats-grid">
-          <div class="stat-tile"><div class="stat-val"      id="sTotalRows">—</div><div class="stat-lbl">Total Rows</div></div>
-          <div class="stat-tile"><div class="stat-val em"   id="sOdChanged">—</div><div class="stat-lbl">OD Changed</div></div>
-          <div class="stat-tile"><div class="stat-val em"   id="sTpChanged">—</div><div class="stat-lbl">TP Changed</div></div>
-          <div class="stat-tile"><div class="stat-val"      id="sChangedPayout">—</div><div class="stat-lbl">Rows w/ Changed Payout</div></div>
-          <div class="stat-tile"><div class="stat-val"      id="sOdProcessed">—</div><div class="stat-lbl">OD Rows Processed</div></div>
-          <div class="stat-tile"><div class="stat-val"      id="sTpProcessed">—</div><div class="stat-lbl">TP Rows Processed</div></div>
+          <div class="stat-tile"><div class="stat-val"       id="sTotalRows">—</div><div class="stat-lbl">Total Rows</div></div>
+          <div class="stat-tile"><div class="stat-val em"    id="sOdChanged">—</div><div class="stat-lbl">OD Changed</div></div>
+          <div class="stat-tile"><div class="stat-val em"    id="sTpChanged">—</div><div class="stat-lbl">TP Changed</div></div>
+          <div class="stat-tile"><div class="stat-val"       id="sChangedPayout">—</div><div class="stat-lbl">Rows w/ Changed Payout</div></div>
+          <div class="stat-tile"><div class="stat-val"       id="sOdProcessed">—</div><div class="stat-lbl">OD Rows Processed</div></div>
+          <div class="stat-tile"><div class="stat-val teal"  id="sStateOv">—</div><div class="stat-lbl">State Override Applied</div></div>
         </div>
       </div>
       <button class="proc-btn" id="procBtn" onclick="runProcess()" disabled>
@@ -1212,11 +859,15 @@
   <span>PayIn ≤ 5 → 0</span>
   <span class="dot">◆</span>
   <span>IRDA OD 15 / 17.5 → 0</span>
-  <span>v2.0</span>
+  <span class="dot">◆</span>
+  <span>State-wise overrides</span>
+  <span>v3.0</span>
 </footer>
 
 <script>
-/* === SEGMENT CHIPS === */
+/* ═══════════════════════════════════════════════════════════════════════════
+   SEGMENT CHIPS (Advanced Settings)
+═══════════════════════════════════════════════════════════════════════════ */
 const ADV_SEGMENTS = [
   {id:'pvtcar',label:'PVT CAR'},{id:'tw',label:'TW'},{id:'gcv',label:'CV / GCV'},
   {id:'pcv',label:'PCV'},{id:'taxi',label:'TAXI'},{id:'bus',label:'BUS'},
@@ -1228,9 +879,9 @@ function buildSegChips(cid) {
     const btn = document.createElement('button');
     btn.className = 'seg-chip'; btn.dataset.seg = seg.id; btn.textContent = seg.label;
     btn.onclick = () => {
-      if (seg.id==='all') {
+      if (seg.id === 'all') {
         const was = btn.classList.contains('on');
-        wrap.querySelectorAll('.seg-chip').forEach(b=>b.classList.remove('on'));
+        wrap.querySelectorAll('.seg-chip').forEach(b => b.classList.remove('on'));
         if (!was) btn.classList.add('on');
       } else {
         wrap.querySelector('[data-seg="all"]')?.classList.remove('on');
@@ -1242,37 +893,250 @@ function buildSegChips(cid) {
 }
 buildSegChips('threshSegs'); buildSegChips('irdaPvtSegs'); buildSegChips('irdaTwSegs');
 function getSelectedSegs(cid) {
-  const chips=[...document.querySelectorAll(`#${cid} .seg-chip.on`)];
+  const chips = [...document.querySelectorAll(`#${cid} .seg-chip.on`)];
   if (!chips.length) return '';
-  if (chips.map(c=>c.dataset.seg).includes('all')) return 'ALL';
-  return chips.map(c=>c.textContent).join(',');
+  if (chips.map(c => c.dataset.seg).includes('all')) return 'ALL';
+  return chips.map(c => c.textContent).join(',');
 }
 
-const state = { payinFile:null, rulesValid:false, processing:false, resultBlob:null, resultName:'' };
+/* ═══════════════════════════════════════════════════════════════════════════
+   STATE GRID
+═══════════════════════════════════════════════════════════════════════════ */
+const ALL_STATES = ['AN','AP','AR','AS','BR','CG','CH','DD','DL','DN','GA','GJ','HP','HR',
+                    'JH','JK','KA','KL','LA','LD','MH','ML','MN','MP','MZ','NL','OD','OR',
+                    'PB','PY','RJ','SK','TG','TN','TR','TS','UA','UK','UP','WB'];
 
-/* === FILE HANDLING === */
-function handleFile(input, which) {
-  const file = input.files[0]; if (!file) return;
-  if (!/\.(xlsx|xls)$/i.test(file.name)) { showErr('Only .xlsx / .xls files are supported.'); return; }
-  state.payinFile = file;
-  document.getElementById('dropPayin').classList.add('filled');
-  document.getElementById('payinName').textContent = '✓ ' + file.name;
-  updateBtn();
-}
-['dropPayin'].forEach(id => {
-  const el = document.getElementById(id);
-  el.addEventListener('dragover', e=>{e.preventDefault();el.classList.add('over');});
-  el.addEventListener('dragleave', ()=>el.classList.remove('over'));
-  el.addEventListener('drop', e=>{
-    e.preventDefault(); el.classList.remove('over');
-    const f=e.dataTransfer.files[0]; if (!f) return;
-    handleFile({files:[f]},'payin');
-    document.getElementById('payinInput').files=e.dataTransfer.files;
+function buildStateGrid() {
+  const grid = document.getElementById('stateGrid');
+  ALL_STATES.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'state-btn'; btn.textContent = s; btn.dataset.state = s;
+    btn.onclick = () => {
+      document.querySelectorAll('.state-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      document.getElementById('sovState').value = s;
+      // Re-run lookup if company already selected
+      document.getElementById('cidResult').className = 'cid-result idle';
+      document.getElementById('cidResult').textContent = 'Select a state & company to resolve rto_group_ids';
+      _sovResolvedGroupIds = null;
+      if (document.getElementById('sovCompanySelect').value) sovOnCompanyChange();
+    };
+    grid.appendChild(btn);
   });
-});
+}
+buildStateGrid();
 
-/* === RULES EDITOR === */
-let rteRules=[], rtePoType='pct', rteRngType='nil';
+/* ═══════════════════════════════════════════════════════════════════════════
+   STATE OVERRIDE FORM
+═══════════════════════════════════════════════════════════════════════════ */
+let sovOverrides = [];
+let sovPoType = 'pct';
+let sovRngType = 'nil';
+let sovApplyTo = 'BOTH';
+let _sovResolvedGroupIds = null; // from lookup
+let _cidDebounceTimer = null;
+
+// Company names map for display
+const COMPANY_NAMES = {
+  '1':'BAJAJ','3':'FUTURE','4':'Reliance','5':'ICICI','8':'HDFC','9':'TATA',
+  '14':'CHOLA','18':'Liberty','19':'Magma','24':'ROYAL','25':'SBI',
+  '26':'SHRIRAM','38':'SOMPO','41':'DIGIT','45':'Zuno'
+};
+
+function sovOnCompanyChange() {
+  const stateCode  = document.getElementById('sovState').value;
+  const companyVal = document.getElementById('sovCompanySelect').value;
+  _sovResolvedGroupIds = null;
+  const resultEl = document.getElementById('cidResult');
+  if (!stateCode || !companyVal) {
+    resultEl.className = 'cid-result idle';
+    resultEl.textContent = 'Select a state & company to resolve rto_group_ids';
+    return;
+  }
+  // Auto-trigger lookup
+  sovLookupCompany();
+}
+
+function sovSelApply(btn) {
+  document.querySelectorAll('.apply-tab').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on'); sovApplyTo = btn.dataset.at;
+}
+
+function sovSelPoType(btn) {
+  document.querySelectorAll('#sovPoTabs .po-tab').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on'); sovPoType = btn.dataset.pt; sovRenderPoInputs();
+}
+function sovRenderPoInputs() {
+  const w = document.getElementById('sovPoInputs');
+  const m = `font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--tx2)`;
+  if (sovPoType === 'pct')
+    w.innerHTML = `<div style="display:flex;align-items:center;gap:.4rem"><input class="rte-input" type="number" id="sovPoPct" placeholder="e.g. 88" min="1" max="200" step="0.5" style="width:110px"/><span style="${m}">% of Payin</span></div>`;
+  else if (sovPoType === 'deduct')
+    w.innerHTML = `<div style="display:flex;align-items:center;gap:.4rem"><span style="${m};color:var(--rose)">−</span><input class="rte-input" type="number" id="sovPoDed" placeholder="e.g. 3" min="1" max="50" step="1" style="width:110px"/><span style="${m}">% from payin</span></div>`;
+  else if (sovPoType === 'fixed')
+    w.innerHTML = `<div style="display:flex;align-items:center;gap:.4rem"><input class="rte-input" type="number" id="sovPoFixed" placeholder="e.g. 21" min="0" max="200" step="0.5" style="width:110px"/><span style="${m}">% PO (fixed)</span></div>`;
+  else
+    w.innerHTML = `<select class="rte-select" id="sovPoSpecial"><option>Payin + 1</option><option>Less 2% of Payin</option></select>`;
+}
+function sovGetPoValue() {
+  if (sovPoType === 'pct') { const v = document.getElementById('sovPoPct')?.value; return v ? `${v}% of Payin` : null; }
+  if (sovPoType === 'deduct') { const v = document.getElementById('sovPoDed')?.value; return v ? `-${v}%` : null; }
+  if (sovPoType === 'fixed') { const v = document.getElementById('sovPoFixed')?.value; return v ? `${v}% PO` : null; }
+  return document.getElementById('sovPoSpecial')?.value || null;
+}
+function sovSelRng(btn) {
+  document.querySelectorAll('#sovRngTabs .rng-tab').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on'); sovRngType = btn.dataset.rt; sovRenderRngInputs();
+}
+function sovRenderRngInputs() {
+  const w = document.getElementById('sovRngInputs');
+  const lo = document.getElementById('sovRngLo'), hi = document.getElementById('sovRngHi'), sep = document.getElementById('sovRngSep');
+  if (sovRngType === 'nil') { w.style.display = 'none'; return; }
+  w.style.display = 'flex';
+  if (sovRngType === 'below') { lo.style.display = 'none'; sep.style.display = 'none'; hi.style.display = ''; hi.placeholder = 'Below %'; }
+  else if (sovRngType === 'above') { hi.style.display = 'none'; sep.style.display = 'none'; lo.style.display = ''; lo.placeholder = 'Above %'; }
+  else { lo.style.display = ''; hi.style.display = ''; sep.style.display = ''; lo.placeholder = 'From %'; hi.placeholder = 'To %'; }
+}
+function sovGetRemarks() {
+  if (sovRngType === 'nil') return 'NIL';
+  const lo = document.getElementById('sovRngLo')?.value, hi = document.getElementById('sovRngHi')?.value;
+  if (sovRngType === 'below') return hi ? `Payin Below ${hi}%` : null;
+  if (sovRngType === 'above') return lo ? `Payin Above ${lo}%` : null;
+  if (sovRngType === 'range') return (lo && hi) ? `Payin ${lo}% to ${hi}%` : null;
+  return null;
+}
+
+async function sovLookupCompany() {
+  const stateCode  = document.getElementById('sovState').value;
+  const companyVal = document.getElementById('sovCompanySelect').value;
+  const resultEl   = document.getElementById('cidResult');
+
+  if (!stateCode)  { resultEl.className = 'cid-result notfound'; resultEl.textContent = '⚠ Select a state first'; return; }
+  if (!companyVal) { resultEl.className = 'cid-result idle'; resultEl.textContent = 'Select a company to look up'; return; }
+
+  const companyName = COMPANY_NAMES[companyVal] || `id=${companyVal}`;
+  resultEl.className = 'cid-result idle'; resultEl.textContent = `⏳ Looking up ${companyName} in ${stateCode}…`;
+
+  try {
+    const resp = await fetch('/rto-lookup', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ rto_code: stateCode, company_id: parseInt(companyVal) })
+    });
+    const data = await resp.json();
+    if (data.success && data.count > 0) {
+      _sovResolvedGroupIds = data.group_ids;
+      resultEl.className = 'cid-result found';
+      resultEl.textContent = `✓ ${companyName} in ${stateCode} → ${data.count} rto_group_id${data.count > 1 ? 's' : ''}: [${data.group_ids.slice(0,8).join(', ')}${data.count > 8 ? '…' : ''}]`;
+    } else if (data.success) {
+      _sovResolvedGroupIds = [];
+      resultEl.className = 'cid-result notfound';
+      resultEl.textContent = `✕ No rto_group_ids for ${companyName} in ${stateCode} — override won't match any rows`;
+    } else {
+      resultEl.className = 'cid-result notfound';
+      resultEl.textContent = `Error: ${data.error}`;
+    }
+  } catch (e) {
+    resultEl.className = 'cid-result notfound';
+    resultEl.textContent = `Network error: ${e.message}`;
+  }
+}
+
+function sovAddOverride() {
+  const err = document.getElementById('sovValErr'); err.classList.remove('show');
+
+  const stateCode = document.getElementById('sovState').value;
+  if (!stateCode) { err.textContent = 'Please select a state'; err.classList.add('show'); return; }
+
+  const segment    = document.getElementById('sovSeg').value;
+  const companyVal = document.getElementById('sovCompanySelect').value;
+  const companyName = COMPANY_NAMES[companyVal] || '';
+
+  if (!companyVal) {
+    err.textContent = 'Please select a company'; err.classList.add('show'); return;
+  }
+
+  const po      = sovGetPoValue();
+  if (!po) { err.textContent = 'PO formula value required'; err.classList.add('show'); return; }
+
+  const remarks = sovGetRemarks();
+  if (!remarks) { err.textContent = 'Range values required'; err.classList.add('show'); return; }
+
+  const entry = {
+    state_code:   stateCode,
+    segment:      segment,
+    insurer_type: 'custom',        // always company-specific
+    company_id:   parseInt(companyVal),
+    company_name: companyName,
+    apply_to:     sovApplyTo,
+    po_formula:   po,
+    remarks:      remarks,
+    _group_ids_preview: _sovResolvedGroupIds,
+  };
+
+  sovOverrides.push(entry);
+  sovRender();
+  sovResetForm();
+}
+
+function sovDelete(i) { sovOverrides.splice(i, 1); sovRender(); }
+
+function sovRender() {
+  const tb = document.getElementById('sovBody');
+  document.getElementById('sovCount').textContent = sovOverrides.length;
+  if (!sovOverrides.length) {
+    tb.innerHTML = '<tr><td colspan="8"><div class="rte-empty"><div class="ei">🗺</div><div class="et">No state overrides yet — add below →</div></div></td></tr>';
+    document.getElementById('sovJsonStatus').className = 'sov-json-status none';
+    document.getElementById('sovJsonStatus').textContent = 'No state overrides';
+    return;
+  }
+  tb.innerHTML = sovOverrides.map((ov, i) => `<tr style="animation-delay:${i * .028}s">
+    <td><div class="rte-row-num">${i + 1}</div></td>
+    <td><span class="state-badge">${ov.state_code}</span></td>
+    <td style="font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--teal)">${ov.segment}</td>
+    <td><span class="ins-cell" style="color:var(--teal)">${ov.company_name || ov.company_id} <span style="color:var(--tx3);font-size:.58rem">(id:${ov.company_id})</span></span></td>
+    <td><span style="font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--sky)">${ov.apply_to}</span></td>
+    <td>${rteRenderPo(ov.po_formula)}</td>
+    <td>${rteRenderRem(ov.remarks)}</td>
+    <td><button class="tbl-rm-btn" onclick="sovDelete(${i})">✕</button></td>
+  </tr>`).join('');
+
+  const states = [...new Set(sovOverrides.map(o => o.state_code))].sort();
+  document.getElementById('sovJsonStatus').className = 'sov-json-status ok';
+  document.getElementById('sovJsonStatus').textContent = `✓ ${sovOverrides.length} overrides · States: ${states.join(', ')}`;
+}
+
+function sovClearAll() {
+  if (sovOverrides.length && !confirm('Clear all state overrides?')) return;
+  sovOverrides = []; sovRender();
+}
+
+function sovResetForm() {
+  document.querySelectorAll('.state-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('sovState').value = '';
+  document.getElementById('sovSeg').value = 'ALL';
+  document.getElementById('sovCompanySelect').value = '';
+  document.getElementById('cidResult').className = 'cid-result idle';
+  document.getElementById('cidResult').textContent = 'Select a state & company to resolve rto_group_ids';
+  _sovResolvedGroupIds = null;
+  // reset apply-to
+  document.querySelectorAll('.apply-tab').forEach(b => b.classList.remove('on'));
+  document.querySelector('.apply-tab[data-at="BOTH"]').classList.add('on');
+  sovApplyTo = 'BOTH';
+  // reset PO
+  document.querySelectorAll('#sovPoTabs .po-tab').forEach(b => b.classList.remove('on'));
+  document.querySelector('#sovPoTabs .po-tab[data-pt="pct"]').classList.add('on');
+  sovPoType = 'pct'; sovRenderPoInputs();
+  // reset range
+  document.querySelectorAll('#sovRngTabs .rng-tab').forEach(b => b.classList.remove('on'));
+  document.querySelector('#sovRngTabs .rng-tab[data-rt="nil"]').classList.add('on');
+  sovRngType = 'nil'; sovRenderRngInputs();
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EXISTING RULES EDITOR (unchanged)
+═══════════════════════════════════════════════════════════════════════════ */
+let rteRules = [], rtePoType = 'pct', rteRngType = 'nil';
 const RTE_SEGMENTS = {
   'TW':['TW SAOD + COMP','TW TP','TW 1+5'],
   'PVT CAR':['PVT CAR COMP + SAOD','PVT CAR TP','PVT CAR 1+3'],
@@ -1285,7 +1149,7 @@ function rteOnLobChange(){ rteUpdateSegOptions(document.getElementById('rteLob')
 function rteUpdateSegOptions(lob){
   const sel=document.getElementById('rteSeg'); sel.innerHTML='';
   const segs=RTE_SEGMENTS[lob]||[];
-  if (!segs.length){sel.innerHTML='<option value="">— select LOB first —</option>';return;}
+  if(!segs.length){sel.innerHTML='<option value="">— select LOB first —</option>';return;}
   segs.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;sel.appendChild(o);});
   if(segs.length===1)sel.value=segs[0];
 }
@@ -1294,7 +1158,7 @@ function rteOnInsChange(){
     document.getElementById('rteInsType').value==='custom'?'':'none';
 }
 function rteSelPoType(btn){
-  document.querySelectorAll('.po-tab').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.rte-form .po-tab').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on'); rtePoType=btn.dataset.pt; rteRenderPoInputs();
 }
 function rteRenderPoInputs(){
@@ -1303,7 +1167,7 @@ function rteRenderPoInputs(){
   if(rtePoType==='pct')
     w.innerHTML=`<div style="display:flex;align-items:center;gap:.4rem"><input class="rte-input" type="number" id="rtePoPct" placeholder="e.g. 88" min="1" max="200" step="0.5" style="width:110px"/><span style="${m}">% of Payin</span></div>`;
   else if(rtePoType==='deduct')
-    w.innerHTML=`<div style="display:flex;align-items:center;gap:.4rem"><span style="${m};color:var(--rose)">−</span><input class="rte-input" type="number" id="rtePoDed" placeholder="e.g. 3" min="0.1" max="50" step="0.5" style="width:110px"/><span style="${m}">% from payin</span></div>`;
+    w.innerHTML=`<div style="display:flex;align-items:center;gap:.4rem"><span style="${m};color:var(--rose)">−</span><input class="rte-input" type="number" id="rtePoDed" placeholder="e.g. 3" min="1" max="50" step="1" style="width:110px"/><span style="${m}">% from payin</span></div>`;
   else if(rtePoType==='fixed')
     w.innerHTML=`<div style="display:flex;align-items:center;gap:.4rem"><input class="rte-input" type="number" id="rtePoFixed" placeholder="e.g. 21" min="0" max="200" step="0.5" style="width:110px"/><span style="${m}">% PO (fixed)</span></div>`;
   else
@@ -1316,7 +1180,7 @@ function rteGetPoValue(){
   return document.getElementById('rtePoSpecial')?.value||null;
 }
 function rteSelRng(btn){
-  document.querySelectorAll('.rng-tab').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.rte-form .rng-tab').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on'); rteRngType=btn.dataset.rt; rteRenderRngInputs();
 }
 function rteRenderRngInputs(){
@@ -1382,8 +1246,12 @@ function rteResetForm(){
   document.getElementById('rteInsCustom').style.display='none';
   document.getElementById('rteInsCustom').value='';
   rteUpdateSegOptions('');
-  rteSelPoType(document.querySelector('.po-tab[data-pt="pct"]'));
-  rteSelRng(document.querySelector('.rng-tab[data-rt="nil"]'));
+  document.querySelectorAll('.rte-form .po-tab').forEach(b=>b.classList.remove('on'));
+  document.querySelector('.rte-form .po-tab[data-pt="pct"]').classList.add('on');
+  rtePoType='pct'; rteRenderPoInputs();
+  document.querySelectorAll('.rte-form .rng-tab').forEach(b=>b.classList.remove('on'));
+  document.querySelector('.rte-form .rng-tab[data-rt="nil"]').classList.add('on');
+  rteRngType='nil'; rteRenderRngInputs();
 }
 function rteLoadDefaults(){
   rteRules=[
@@ -1413,15 +1281,42 @@ function rteLoadDefaults(){
   rteRender(); rteSyncJson();
 }
 function rteClearAll(){if(rteRules.length&&!confirm('Clear all rules?'))return;rteRules=[];rteRender();rteSyncJson();}
-function validateJson(){}
-async function _validateJson(){}
 
-/* === BUTTON STATE === */
+/* ═══════════════════════════════════════════════════════════════════════════
+   FILE HANDLING
+═══════════════════════════════════════════════════════════════════════════ */
+const state = { payinFile:null, rulesValid:false, processing:false, resultBlob:null, resultName:'' };
+
+function handleFile(input, which) {
+  const file = input.files[0]; if (!file) return;
+  if (!/\.(xlsx|xls)$/i.test(file.name)) { showErr('Only .xlsx / .xls files are supported.'); return; }
+  state.payinFile = file;
+  document.getElementById('dropPayin').classList.add('filled');
+  document.getElementById('payinName').textContent = '✓ ' + file.name;
+  updateBtn();
+}
+['dropPayin'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('dragover', e=>{e.preventDefault();el.classList.add('over');});
+  el.addEventListener('dragleave', ()=>el.classList.remove('over'));
+  el.addEventListener('drop', e=>{
+    e.preventDefault(); el.classList.remove('over');
+    const f=e.dataTransfer.files[0]; if(!f) return;
+    handleFile({files:[f]},'payin');
+    document.getElementById('payinInput').files=e.dataTransfer.files;
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BUTTON STATE
+═══════════════════════════════════════════════════════════════════════════ */
 function updateBtn(){
   document.getElementById('procBtn').disabled=!(state.payinFile&&state.rulesValid&&!state.processing);
 }
 
-/* === PROCESS === */
+/* ═══════════════════════════════════════════════════════════════════════════
+   PROCESS
+═══════════════════════════════════════════════════════════════════════════ */
 async function runProcess(){
   if(state.processing)return;
   state.processing=true;updateBtn();hideErr();hideSuc();
@@ -1433,13 +1328,15 @@ async function runProcess(){
     pct=Math.min(pct+2,85);fill.style.width=pct+'%';
     if(pct<20)txt.textContent='Uploading files…';
     else if(pct<50)txt.textContent='Loading data…';
-    else if(pct<80)txt.textContent='Recalculating payout rows…';
+    else if(pct<70)txt.textContent='Recalculating payout rows…';
+    else if(pct<82)txt.textContent='Applying state overrides…';
     else txt.textContent='Finalising output…';
   },180);
   try {
     const fd=new FormData();
     fd.append('payin_file',state.payinFile);
     fd.append('rules_json',document.getElementById('rulesJson').value.trim());
+    fd.append('state_overrides_json', JSON.stringify(sovOverrides));
     fd.append('payin_min',document.getElementById('payinMin').value);
     fd.append('irda_pvt_car',document.getElementById('irdaPvtCar').value);
     fd.append('irda_tw',document.getElementById('irdaTw').value);
@@ -1467,10 +1364,12 @@ async function runProcess(){
   } finally {state.processing=false;updateBtn();}
 }
 function showStats(s){
-  ['sTotalRows','sOdChanged','sTpChanged','sChangedPayout','sOdProcessed','sTpProcessed'].forEach((id,i)=>{
-    const keys=['total_rows','od_changed','tp_changed','changed_payout','od_processed','tp_processed'];
-    document.getElementById(id).textContent=fmt(s[keys[i]]);
-  });
+  document.getElementById('sTotalRows').textContent    = fmt(s.total_rows);
+  document.getElementById('sOdChanged').textContent    = fmt(s.od_changed);
+  document.getElementById('sTpChanged').textContent    = fmt(s.tp_changed);
+  document.getElementById('sChangedPayout').textContent= fmt(s.changed_payout);
+  document.getElementById('sOdProcessed').textContent  = fmt(s.od_processed);
+  document.getElementById('sStateOv').textContent      = fmt(s.state_override_count);
   document.getElementById('statsArea').style.display='block';
 }
 function fmt(n){return typeof n==='number'?n.toLocaleString():(n||'—');}
@@ -1479,9 +1378,14 @@ function hideErr(){document.getElementById('errBox').classList.remove('show');}
 function showSuc(msg){document.getElementById('sucMsg').textContent=msg;document.getElementById('sucBox').classList.add('show');}
 function hideSuc(){document.getElementById('sucBox').classList.remove('show');}
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════════════════════ */
 rteRenderPoInputs();
 rteRenderRngInputs();
 rteLoadDefaults();
+sovRenderPoInputs();
+sovRenderRngInputs();
 </script>
 </body>
 </html>
